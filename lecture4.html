@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQE Lecture 4 — Testing Scopes & Approaches</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono&display=swap');
+  :root {
+    --navy:#0d1b2e;--navy2:#1a2e47;--teal:#0e9f7c;--teal-light:#d1f5ec;
+    --gold:#e8a020;--gold-light:#fef3dc;--red:#d83c2a;--red-light:#fdecea;
+    --blue:#1a6fc4;--blue-light:#deeeff;--purple:#5c3ab7;--purple-light:#ede8fb;
+    --green:#2e7d32;--green-light:#e8f5e9;--orange:#c45c10;--orange-light:#fdebd0;
+    --gray:#f4f5f6;--border:#dde1e7;--text:#1a1e26;--muted:#5a6272;--white:#fff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'IBM Plex Sans',sans-serif;background:#f0f2f5;color:var(--text);line-height:1.7;}
+  .page-header{background:var(--navy);color:white;padding:2.5rem 2rem 2rem;position:relative;overflow:hidden;}
+  .page-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--gold));}
+  .badge{display:inline-block;background:var(--teal);color:white;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:4px;margin-right:6px;margin-bottom:12px;}
+  .badge.blue{background:var(--blue-light);color:var(--blue);}
+  .badge.green{background:var(--green-light);color:var(--green);}
+  .badge.amber{background:var(--gold-light);color:var(--orange);}
+  .badge.purple{background:var(--purple-light);color:var(--purple);}
+  .page-header h1{font-family:'Merriweather',serif;font-size:26px;font-weight:700;margin-bottom:6px;}
+  .page-header p{font-size:13px;opacity:.7;}
+  .nav-tabs{background:var(--navy2);display:flex;gap:0;overflow-x:auto;padding:0 1.5rem;}
+  .nav-tab{padding:14px 20px;font-size:13px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;user-select:none;}
+  .nav-tab:hover{color:rgba(255,255,255,.85);}
+  .nav-tab.active{color:white;border-bottom-color:var(--teal);}
+  .container{max-width:920px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* Cards */
+  .card{background:white;border-radius:10px;border:1px solid var(--border);margin-bottom:1.5rem;overflow:hidden;}
+  .card-header{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+  .card-header .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .card-header h2{font-size:16px;font-weight:700;}
+  .card-header .slide-tag{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);background:var(--gray);padding:3px 8px;border-radius:4px;white-space:nowrap;}
+  .card-body{padding:1.5rem;}
+
+  /* Boxes */
+  .definition-box{background:var(--navy);color:white;border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;border-left:4px solid var(--gold);}
+  .definition-box .label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+  .definition-box p{font-family:'Merriweather',serif;font-style:italic;font-size:14px;line-height:1.9;}
+  .definition-box .source{font-size:12px;opacity:.6;margin-top:8px;font-style:normal;font-family:'IBM Plex Sans',sans-serif;}
+  .insight{background:var(--teal-light);border:1px solid #a8e8d6;border-radius:8px;padding:1rem 1.25rem;margin-top:1rem;font-size:14px;}
+  .insight strong{color:var(--teal);}
+  .warning{background:var(--gold-light);border:1px solid #f5d89a;border-radius:8px;padding:1rem 1.25rem;margin-top:1rem;font-size:14px;}
+  .warning strong{color:var(--gold);}
+  .danger-box{background:var(--red-light);border:1px solid #f5b0a0;border-radius:8px;padding:1rem 1.25rem;margin-top:1rem;font-size:14px;}
+  .danger-box strong{color:var(--red);}
+
+  /* Two cols */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  @media(max-width:620px){.two-col{grid-template-columns:1fr;}}
+  .info-block{background:var(--gray);border-radius:8px;padding:1rem 1.25rem;}
+  .info-block h3{font-size:14px;font-weight:700;margin-bottom:10px;}
+  .info-block ul{list-style:none;padding:0;}
+  .info-block ul li{font-size:13px;padding:4px 0;display:flex;gap:8px;border-bottom:1px solid var(--border);}
+  .info-block ul li:last-child{border-bottom:none;}
+  .info-block ul li::before{content:'→';color:var(--teal);font-weight:700;flex-shrink:0;}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1rem;}
+  th{background:var(--navy);color:white;padding:8px 12px;text-align:left;font-size:12px;}
+  td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tr:nth-child(even) td{background:var(--gray);}
+  td strong{font-weight:700;color:var(--navy);}
+
+  /* Activity boxes */
+  .activity-box{background:var(--navy);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;}
+  .act-header{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+  .act-badge{background:var(--gold);color:var(--navy);font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;}
+  .activity-box h3{font-size:15px;font-weight:700;}
+  .activity-box .q{background:rgba(255,255,255,.08);border-radius:8px;padding:1rem 1.25rem;margin-bottom:.75rem;}
+  .activity-box .q .q-text{font-size:14px;margin-bottom:10px;}
+  .activity-box .q .answer{background:rgba(14,159,124,.2);border:1px solid var(--teal);border-radius:6px;padding:.75rem 1rem;font-size:13px;margin-top:8px;line-height:1.8;}
+  .activity-box .q .answer .ans-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:4px;}
+
+  /* Sample Questions */
+  .q-section{margin-bottom:2rem;}
+  .q-section h2{font-size:18px;font-weight:700;margin-bottom:1rem;padding-bottom:8px;border-bottom:2px solid var(--border);}
+  .q-item{border:1px solid var(--border);border-radius:8px;margin-bottom:1rem;overflow:hidden;}
+  .q-item .q-header{padding:1rem 1.25rem;background:white;cursor:pointer;display:flex;align-items:flex-start;gap:10px;user-select:none;}
+  .q-item .q-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;}
+  .q-item .q-text{font-size:14px;font-weight:500;flex:1;}
+  .q-item .q-toggle{font-size:12px;color:var(--muted);margin-left:auto;flex-shrink:0;margin-top:4px;}
+  .q-item .q-answer{display:none;padding:1rem 1.25rem;background:var(--gray);border-top:1px solid var(--border);font-size:13px;line-height:1.9;}
+  .q-item .q-answer .marks{display:inline-block;background:var(--teal);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;}
+  .q-item .q-answer.open{display:block;}
+  .q-type{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;}
+  .type-recall{background:var(--blue-light);color:var(--blue);}
+  .type-apply{background:var(--teal-light);color:#0a6e52;}
+  .type-scenario{background:var(--gold-light);color:#7a5000;}
+  .q-num.remember{background:var(--blue-light);color:var(--blue);}
+  .q-num.apply{background:var(--teal-light);color:var(--teal);}
+  .q-num.scenario{background:var(--gold-light);color:var(--gold);}
+
+  /* Key points and text elements */
+  h3{font-size:16px;font-weight:700;margin:1.5rem 0 0.75rem;color:var(--text);}
+  h4{font-size:14px;font-weight:700;margin:1rem 0 0.5rem;color:var(--text);}
+  p{font-size:14px;line-height:1.7;color:var(--text);margin-bottom:0.5rem;}
+  .section-intro{font-size:14px;margin-bottom:1rem;color:var(--text);}
+
+  /* Pill tags */
+  .pill{font-size:12px;padding:4px 10px;border-radius:99px;border:0.5px solid var(--border);color:var(--muted);background:var(--gray);display:inline-block;margin:3px 3px 3px 0;}
+  .pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;}
+
+  /* Key points list */
+  .key-point{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid var(--border);}
+  .key-point:last-child{border-bottom:none;}
+  .kp-icon{font-size:16px;margin-top:2px;flex-shrink:0;color:var(--blue);}
+  .kp-text{font-size:13px;line-height:1.6;color:var(--text);}
+  .kp-bold{font-weight:700;color:var(--navy);}
+
+  /* Code & Pre */
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--gray);border:0.5px solid var(--border);border-radius:4px;padding:0 4px;color:var(--navy);}
+  pre{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--gray);border:0.5px solid var(--border);border-radius:4px;padding:1rem;overflow-x:auto;margin-bottom:1rem;line-height:1.6;color:var(--text);}
+
+  /* V-Model */
+  .vm-row{display:flex;gap:10px;align-items:center;margin-bottom:8px;font-size:13px;}
+  .vm-dev{background:var(--blue-light);border:0.5px solid #B5D4F4;border-radius:4px;padding:6px 12px;color:var(--blue);font-weight:600;min-width:140px;}
+  .vm-arrow{color:var(--muted);font-size:14px;flex-shrink:0;}
+  .vm-test{background:var(--green-light);border:0.5px solid #C0DD97;border-radius:4px;padding:6px 12px;color:var(--green);font-weight:600;min-width:140px;}
+
+  /* Divider */
+  hr{border:none;border-top:0.5px solid var(--border);margin:1.25rem 0;}
+
+  /* Terms grid */
+  .terms-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+  @media(max-width:600px){.terms-grid{grid-template-columns:1fr;}}
+  .term-item{background:var(--gray);border-radius:8px;padding:.75rem 1rem;border-left:3px solid var(--teal);}
+  .term-item .term{font-weight:700;font-size:14px;color:var(--navy);margin-bottom:3px;}
+  .term-item .def{font-size:13px;color:var(--muted);}
+
+  /* Three col layout */
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+  @media(max-width:700px){.three-col{grid-template-columns:1fr;}}
+
+  /* Responsive */
+  @media(max-width:480px){
+    .page-header h1{font-size:20px;}
+    h3{font-size:15px;}
+    .card-body{padding:1rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;opacity:0.9;">Software Quality Engineering</div>
+  <h1>Week 4 — Testing Scopes &amp; Approaches</h1>
+  <p>Study Notes · Class Activities · Sample Exam Questions | CLO-1 (C-1: Remember) &amp; CLO-2 (C-2: Understand) | 4 Activities Solved | Exam Questions Included</p>
+  <div style="margin-top:8px;">
+    <span class="badge blue">CLO-1 Remember</span>
+    <span class="badge green">CLO-2 Understand</span>
+    <span class="badge amber">4 Activities</span>
+    <span class="badge purple">Exam Q's</span>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showPage('notes')">📒 Study Notes</div>
+  <div class="nav-tab" onclick="showPage('activities')">✏️ Class Activities</div>
+  <div class="nav-tab" onclick="showPage('questions')">🎯 Exam Questions</div>
+  <div class="nav-tab" onclick="showPage('cheatsheet')">📚 Quick Revision</div>
+</div>
+
+<!-- ===== STUDY NOTES ===== -->
+<div class="page active container" id="page-notes">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">🔍</div>
+      <h2>Section 1 — Testing Scopes &amp; the V-Model</h2>
+      <span class="slide-tag">Slide 2–3</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">What are Testing Scopes?</div>
+        <p>They define the <em>boundary and objective</em> of a test effort — what part of the system is being tested, at what level, and under what conditions. There are four standard scopes forming a progression from smallest to largest.</p>
+      </div>
+
+      <h4>The V-Model (Verification &amp; Validation)</h4>
+      <p style="margin-bottom:1rem;font-size:13px;color:var(--muted);">Each development phase on the LEFT arm maps directly to a test phase on the RIGHT arm. Tests are planned early during design, and executed later as the system is built.</p>
+      <div class="vm-row"><div class="vm-dev">Requirements Analysis</div><div class="vm-arrow">↔</div><div class="vm-test">Acceptance Testing</div></div>
+      <div class="vm-row"><div class="vm-dev">System Design</div><div class="vm-arrow">↔</div><div class="vm-test">System Testing</div></div>
+      <div class="vm-row"><div class="vm-dev">Architectural Design</div><div class="vm-arrow">↔</div><div class="vm-test">Integration Testing</div></div>
+      <div class="vm-row"><div class="vm-dev">Module / Detailed Design</div><div class="vm-arrow">↔</div><div class="vm-test">Unit Testing</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#e8f5e9;">✓</div>
+      <h2>Section 2 — Unit Testing</h2>
+      <span class="slide-tag">Slide 4–6</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">Definition</div>
+        <p>Testing the smallest independently testable parts (functions, methods, classes) <strong>in complete isolation</strong> from the rest of the system.</p>
+      </div>
+
+      <h4>Goals of Unit Testing</h4>
+      <div class="key-point"><span class="kp-icon">✓</span><div><div class="kp-bold">Correctness</div><div class="kp-text">Verify each unit behaves per its specification</div></div></div>
+      <div class="key-point"><span class="kp-icon">✓</span><div><div class="kp-bold">Regression protection</div><div class="kp-text">Alert when a change breaks existing functionality</div></div></div>
+      <div class="key-point"><span class="kp-icon">✓</span><div><div class="kp-bold">Safe refactoring</div><div class="kp-text">Failures become immediately visible</div></div></div>
+      <div class="key-point"><span class="kp-icon">✓</span><div><div class="kp-bold">Live documentation</div><div class="kp-text">Executable specification of intended behaviour</div></div></div>
+
+      <h4>Key Characteristics</h4>
+      <table>
+        <tr><th>Characteristic</th><th>Detail</th></tr>
+        <tr><td><strong>Scope</strong></td><td>Single function, method, or class</td></tr>
+        <tr><td><strong>Isolation</strong></td><td>No database, no network, no file system — all dependencies replaced</td></tr>
+        <tr><td><strong>Speed</strong></td><td>Milliseconds per test; thousands can run in seconds</td></tr>
+        <tr><td><strong>Author</strong></td><td>Written by the developer</td></tr>
+        <tr><td><strong>Frameworks</strong></td><td>JUnit 5 (Java), pytest (Python), NUnit/xUnit (.NET), Jest (JS)</td></tr>
+        <tr><td><strong>Run frequency</strong></td><td>Every commit (CI/CD) or every save (TDD)</td></tr>
+      </table>
+
+      <h4>Test Doubles — The 5 Types</h4>
+      <p style="margin-bottom:0.75rem;font-size:13px;">Because unit tests run in isolation, all external dependencies are replaced with <strong>Test Doubles</strong>:</p>
+      <table>
+        <tr><th>Type</th><th>Definition</th><th>Example</th></tr>
+        <tr><td><strong>Stub</strong></td><td>Returns pre-configured fixed values. No logic.</td><td>Hard-coded list instead of real DB query</td></tr>
+        <tr><td><strong>Mock</strong></td><td>Records calls and allows assertions on how it was called.</td><td>Verify email service called once with correct params</td></tr>
+        <tr><td><strong>Fake</strong></td><td>Working simplified implementation, not for production.</td><td>In-memory HashMap instead of real DB</td></tr>
+        <tr><td><strong>Spy</strong></td><td>Wraps real object, records calls transparently.</td><td>Wrap logger to verify it was called, but still log</td></tr>
+        <tr><td><strong>Dummy</strong></td><td>Passed as required parameter but never used.</td><td>Placeholder User object when only ID is needed</td></tr>
+      </table>
+
+      <h4>The AAA Pattern (Arrange–Act–Assert)</h4>
+      <div class="warning" style="margin-bottom:1rem;">
+        <strong>Every well-written unit test follows AAA — it makes tests self-documenting.</strong>
+        <table style="margin-top:0.75rem;">
+          <tr><th>Phase</th><th>Purpose</th><th>What to do</th></tr>
+          <tr><td><strong>Arrange</strong></td><td>Set up preconditions</td><td>Create objects, configure stubs/mocks, prepare input data</td></tr>
+          <tr><td><strong>Act</strong></td><td>Execute the behaviour under test</td><td>Call the single function being tested</td></tr>
+          <tr><td><strong>Assert</strong></td><td>Verify the outcome</td><td>Check actual result equals expected; one assertion preferred</td></tr>
+        </table>
+      </div>
+
+      <h4>AAA Example (Python / pytest)</h4>
+      <pre>def test_fine_for_5_days():
+    # Arrange
+    days = 5
+    # Act
+    result = calculate_fine(days)
+    # Assert
+    assert result == 2.50  # 5 * 0.50
+
+def test_negative_days_raises_ValueError():
+    with pytest.raises(ValueError):
+        calculate_fine(-1)</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#d1f5ec;">🔗</div>
+      <h2>Section 3 — Integration Testing</h2>
+      <span class="slide-tag">Slide 7–8</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">Definition</div>
+        <p>Verifies that two or more modules work correctly when combined. Confirms that interfaces and data flows between pieces are correct.</p>
+      </div>
+
+      <h4>Common Defects Caught at Integration Level</h4>
+      <div class="pill-row">
+        <span class="pill">Mismatched data types between modules</span>
+        <span class="pill">Wrong API contracts</span>
+        <span class="pill">Timing/sync errors</span>
+        <span class="pill">Database interaction bugs</span>
+        <span class="pill">Third-party service failures</span>
+      </div>
+
+      <h4>Integration Strategies</h4>
+      <table>
+        <tr><th>Strategy</th><th>Approach</th><th>Pros</th><th>Cons</th><th>Best For</th></tr>
+        <tr><td><strong>Big Bang</strong></td><td>All modules integrated at once</td><td>No stubs/drivers needed</td><td>Hard to isolate failures; high risk</td><td>Small simple systems</td></tr>
+        <tr><td><strong>Top-Down</strong></td><td>Start from top-level; stubs for lower modules</td><td>Architecture validated early</td><td>Many stubs; lower modules tested late</td><td>Architecture is the main risk</td></tr>
+        <tr><td><strong>Bottom-Up</strong></td><td>Start from lowest level; drivers for upper modules</td><td>Low-level modules tested thoroughly</td><td>User-visible behaviour tested last</td><td>Systems built on critical utilities</td></tr>
+        <tr><td><strong>Sandwich (Hybrid)</strong></td><td>Top-Down + Bottom-Up simultaneously</td><td>Reduces stubs and drivers</td><td>Complex to manage</td><td>Large layered systems</td></tr>
+      </table>
+
+      <div class="insight">
+        <strong>Key Concept — Stubs vs Drivers:</strong><br>
+        <strong>Stub</strong> = a fake lower-level module used in Top-Down testing<br>
+        <strong>Driver</strong> = a fake upper-level module used in Bottom-Up testing
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#fdecea;">🎯</div>
+      <h2>Section 4 — System Testing &amp; Acceptance Testing</h2>
+      <span class="slide-tag">Slide 9–11</span>
+    </div>
+    <div class="card-body">
+      <h4>System Testing</h4>
+      <div class="definition-box">
+        <div class="label">Definition</div>
+        <p>Evaluates the complete integrated product against specified requirements in a production-like environment. Takes a <em>black-box perspective</em> — only observable behaviour matters.</p>
+      </div>
+
+      <table>
+        <tr><th>Test Type</th><th>What it checks</th><th>Tools</th></tr>
+        <tr><td>Functional</td><td>All use cases work end-to-end</td><td>Selenium, Cypress</td></tr>
+        <tr><td>Performance</td><td>Load, stress, soak, spike</td><td>JMeter, k6, Gatling</td></tr>
+        <tr><td>Security</td><td>Vulnerabilities, auth, injection attacks</td><td>OWASP ZAP, Burp Suite</td></tr>
+        <tr><td>Usability</td><td>User efficiency and satisfaction</td><td>Think-aloud, task success rates</td></tr>
+        <tr><td>Compatibility</td><td>Browsers, OS, devices, screen sizes</td><td>BrowserStack</td></tr>
+        <tr><td>Recovery</td><td>Behaviour after crashes/data corruption</td><td>Chaos engineering</td></tr>
+      </table>
+
+      <h4 style="margin-top:1.5rem;">Acceptance Testing</h4>
+      <p>Final testing before release. Answers: <em>"Is this what we asked for, and is it ready to use?"</em> Performed by end users or business stakeholders.</p>
+      <table>
+        <tr><th>Sub-type</th><th>Who performs</th><th>Purpose</th></tr>
+        <tr><td><strong>UAT</strong></td><td>End users/business stakeholders</td><td>Confirm system supports real business processes</td></tr>
+        <tr><td><strong>Alpha Testing</strong></td><td>Internal team at developer site</td><td>Internal validation before external exposure</td></tr>
+        <tr><td><strong>Beta Testing</strong></td><td>Selected external users</td><td>Real-world feedback before general release</td></tr>
+        <tr><td><strong>Contract Testing</strong></td><td>Customer/client team</td><td>Verify all contractual deliverables are met</td></tr>
+      </table>
+
+      <h4 style="margin-top:1.5rem;">All 4 Scopes — Side-by-Side</h4>
+      <table style="font-size:12px;">
+        <tr><th>Dimension</th><th>Unit</th><th>Integration</th><th>System</th><th>Acceptance</th></tr>
+        <tr><td><strong>Scope</strong></td><td>Single function/method</td><td>2+ modules</td><td>Complete system</td><td>Business use cases</td></tr>
+        <tr><td><strong>Tested by</strong></td><td>Developer</td><td>Dev / QA</td><td>QA team</td><td>End users / client</td></tr>
+        <tr><td><strong>When</strong></td><td>During coding</td><td>After unit tests pass</td><td>After integration</td><td>Before delivery</td></tr>
+        <tr><td><strong>Defects found</strong></td><td>Logic &amp; algorithm</td><td>Interface &amp; data flow</td><td>End-to-end failures</td><td>Requirement gaps</td></tr>
+        <tr><td><strong>Speed</strong></td><td>Very fast (ms)</td><td>Moderate</td><td>Slow (mins–hrs)</td><td>Slowest (days)</td></tr>
+        <tr><td><strong>Automation</strong></td><td>High</td><td>Medium</td><td>Medium</td><td>Low (mostly manual)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#ede8fb;">🔬</div>
+      <h2>Section 5 — Testing Approaches</h2>
+      <span class="slide-tag">Slide 12–14</span>
+    </div>
+    <div class="card-body">
+      <h4>Black-Box Testing</h4>
+      <div class="definition-box">
+        <div class="label">Definition</div>
+        <p>Evaluates external behaviour without any knowledge of internal structure. Tester knows only inputs and expected outputs. Best for: functional testing, acceptance testing, regression testing.</p>
+      </div>
+
+      <table>
+        <tr><th>Technique</th><th>Principle</th><th>Example (Age: valid 18–65)</th></tr>
+        <tr><td><strong>Equivalence Partitioning (EP)</strong></td><td>Divide input into classes expected to behave identically. Test one representative per class.</td><td>Partitions: &lt;18 invalid, 18–65 valid, &gt;65 invalid. Test: 10, 30, 70</td></tr>
+        <tr><td><strong>Boundary Value Analysis (BVA)</strong></td><td>Test at and around edges of partitions — where defects concentrate.</td><td>Test: 17, 18, 19 (lower); 64, 65, 66 (upper)</td></tr>
+        <tr><td><strong>Decision Table Testing</strong></td><td>Enumerate all combinations of input conditions and map to expected actions.</td><td>Login: valid user AND valid pass → grant. All 4 T/F combos mapped.</td></tr>
+        <tr><td><strong>Use-Case / Scenario Testing</strong></td><td>Test complete end-to-end user workflows.</td><td>Student: search → check availability → reserve → collect</td></tr>
+      </table>
+
+      <h4>White-Box Testing</h4>
+      <div class="definition-box">
+        <div class="label">Definition</div>
+        <p>Designs test cases based on internal logic and structure of code. Tester has full access to source code. Also called structural or glass-box testing. Best for: unit testing, security auditing, safety-critical systems.</p>
+      </div>
+
+      <table>
+        <tr><th>Coverage Type</th><th>Definition</th><th>Industry Target</th></tr>
+        <tr><td><strong>Statement</strong></td><td>Every executable statement executed at least once</td><td>70–80%</td></tr>
+        <tr><td><strong>Branch</strong></td><td>Every branch (true AND false) of every decision executed</td><td>80–90%</td></tr>
+        <tr><td><strong>Condition</strong></td><td>Each boolean sub-condition evaluated to both true and false</td><td>85–95%</td></tr>
+        <tr><td><strong>Path</strong></td><td>Every distinct execution path through the function exercised</td><td>100% (often infeasible)</td></tr>
+        <tr><td><strong>MC/DC</strong></td><td>Each condition independently affects the decision outcome</td><td>100% required (aviation, railway, safety)</td></tr>
+      </table>
+
+      <div class="warning">
+        <strong>Branch Coverage Example:</strong><br>
+        <pre style="margin-top:0.5rem;margin-bottom:0;">def classify_score(score):
+    if score >= 50:      # Branch True → test with 75
+        return 'Pass'
+    else:                # Branch False → test with 30
+        return 'Fail'
+# Two tests achieve 100% branch coverage</pre>
+      </div>
+
+      <h4>Grey-Box Testing</h4>
+      <div class="definition-box">
+        <div class="label">Definition</div>
+        <p>Combines both perspectives — tester has partial knowledge (API contracts, data models, architecture) but still approaches the system externally as a user. Best for: integration testing, API testing, penetration testing.</p>
+      </div>
+
+      <h4>Approach Selection Guide</h4>
+      <table style="font-size:12px;">
+        <tr><th>Scenario</th><th>Approach</th><th>Rationale</th></tr>
+        <tr><td>Testing a sorting algorithm</td><td>White-Box</td><td>Need to verify all code paths; branch/path coverage required</td></tr>
+        <tr><td>Testing a login form</td><td>Black-Box</td><td>Test valid/invalid combos without needing implementation details</td></tr>
+        <tr><td>Testing REST API endpoints</td><td>Grey-Box</td><td>Know API contract but not full implementation</td></tr>
+        <tr><td>100% coverage of safety module</td><td>White-Box</td><td>MC/DC coverage mandated by safety standards</td></tr>
+        <tr><td>UAT before go-live</td><td>Black-Box</td><td>Users have no interest in code internals; behaviour only</td></tr>
+        <tr><td>Regression after a bug fix</td><td>Grey-Box</td><td>Combine automated regression with targeted checks at fix site</td></tr>
+        <tr><td>Security penetration test</td><td>Grey-Box</td><td>Attacker has partial knowledge; uses both external and structural techniques</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#fef3dc;">📊</div>
+      <h2>Section 6 — Static vs. Dynamic Testing</h2>
+      <span class="slide-tag">Slide 15</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th>Dimension</th><th>Static Testing</th><th>Dynamic Testing</th></tr>
+        <tr><td><strong>Core principle</strong></td><td>Find defects WITHOUT executing software</td><td>Find defects BY executing software</td></tr>
+        <tr><td><strong>When applied</strong></td><td>Requirements, design, code — any artefact</td><td>Only executable software</td></tr>
+        <tr><td><strong>Execution required?</strong></td><td>No</td><td>Yes</td></tr>
+        <tr><td><strong>Defects found</strong></td><td>Ambiguities, design flaws, unreachable code, security vulnerabilities</td><td>Runtime errors, wrong outputs, performance bottlenecks, race conditions</td></tr>
+        <tr><td><strong>Tools</strong></td><td>SonarQube, ESLint, Pylint, Fortify</td><td>JUnit, pytest, Selenium, JMeter, Postman</td></tr>
+      </table>
+
+      <h4 style="margin-top:1.5rem;">Static Testing Techniques</h4>
+      <table>
+        <tr><th>Review Type</th><th>Description</th></tr>
+        <tr><td>Informal Review</td><td>Ad hoc — no defined process</td></tr>
+        <tr><td>Walkthrough</td><td>Author-led — author explains the artefact to peers</td></tr>
+        <tr><td>Technical Review</td><td>Peer-led — structured discussion by peers</td></tr>
+        <tr><td>Fagan Inspection</td><td>Most rigorous — finds 60–90% of defects before execution (IBM, 1976)</td></tr>
+      </table>
+
+      <div class="insight">
+        <strong>Key principle:</strong> Static testing is most cost-effective <em>early</em> in the lifecycle. Defects found at requirements stage cost 10–100× less to fix than defects found in production (Boehm, 1981).<br><br>
+        In CI/CD pipelines: static linters run on every commit; dynamic test suites run on every build.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== ACTIVITIES ===== -->
+<div class="page container" id="page-activities">
+
+  <p style="font-size:14px;color:var(--muted);margin-bottom:1.5rem;">All activities are from the lecture notes. Try each question yourself before reading the model answer.</p>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 1</span><h3>Writing Your First Unit Test</h3></div>
+    <div class="q">
+      <div class="q-text"><strong>Task:</strong> Write at least 4 unit tests for <code>calculate_discount(price, loyalty_years)</code> using the AAA pattern.<br><br>Rules: 0–1 years = 0% | 2–4 years = 10% | 5+ years = 20% | ValueError if price &lt; 0 or loyalty_years &lt; 0</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer — 4 Tests Using AAA Pattern</div>
+        <pre>import pytest
+
+# Test 1 — 0-1 years loyalty → 0% discount
+def test_no_discount_for_new_customer():
+    # Arrange
+    price = 100
+    loyalty_years = 1
+    # Act
+    result = calculate_discount(price, loyalty_years)
+    # Assert
+    assert result == 100.0  # 0% discount
+
+# Test 2 — 2-4 years loyalty → 10% discount
+def test_ten_percent_discount():
+    # Arrange
+    price = 200
+    loyalty_years = 3
+    # Act
+    result = calculate_discount(price, loyalty_years)
+    # Assert
+    assert result == 180.0  # 200 - 10% = 180
+
+# Test 3 — 5+ years loyalty → 20% discount
+def test_twenty_percent_discount():
+    # Arrange
+    price = 500
+    loyalty_years = 7
+    # Act
+    result = calculate_discount(price, loyalty_years)
+    # Assert
+    assert result == 400.0  # 500 - 20% = 400
+
+# Test 4 — ValueError on negative price
+def test_negative_price_raises_ValueError():
+    with pytest.raises(ValueError):
+        calculate_discount(-50, 3)</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 2</span><h3>Integration Strategy Selection</h3></div>
+    <div class="q">
+      <div class="q-text"><strong>Scenario:</strong> Three-tier web application — Presentation Layer (React frontend) | Business Logic Layer (Node.js API) | Data Layer (PostgreSQL DB)<br><br><strong>Q1:</strong> Which integration strategy and why?<br><strong>Q2:</strong> Stubs or Drivers needed?<br><strong>Q3:</strong> One specific integration defect between Business Logic and Data layers</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Q1 — Recommended: Bottom-Up strategy.</strong><br>
+        The Data Layer (PostgreSQL) is the most critical shared dependency — all business logic and presentation depends on it. By testing the Data Layer first, then moving up to Business Logic, then Presentation, we ensure the foundation is solid before testing higher-level behaviour.<br><br>
+
+        <strong>Q2 — Integration Strategy &amp; Test Doubles:</strong><br>
+        Bottom-Up requires <strong>Test Drivers</strong> — fake Node.js API calls to test the PostgreSQL DB layer in isolation.<br><br>
+
+        <strong>Q3 — Specific Integration Defect:</strong><br>
+        The Node.js API sends a user ID as a <strong>String</strong> in the SQL query, but the PostgreSQL schema defines the <code>user_id</code> column as an <strong>INTEGER</strong>. Each module passes unit tests in isolation — but when combined, the type mismatch causes a query to return no results or throw a type error. This defect would ONLY be caught at integration level.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 3</span><h3>Approach Matching (Banking App)</h3></div>
+    <div class="q">
+      <div class="q-text"><strong>Select Black / White / Grey-box for each:</strong><br>
+      a. Login function<br>
+      b. Interest calculation algorithm<br>
+      c. UI transaction flow (transfer money screen)<br>
+      d. REST API between mobile app and backend</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>a. Login function → Black-Box</strong><br>
+        The tester inputs valid/invalid usernames and passwords and checks whether access is granted or denied. No need to see the internal authentication algorithm.<br><br>
+
+        <strong>b. Interest calculation algorithm → White-Box</strong><br>
+        Complex conditional logic (different rates for different account types, compound vs simple interest). All branches and conditions must be verified — developer must examine code paths.<br><br>
+
+        <strong>c. UI transaction flow → Black-Box</strong><br>
+        UI testing validates the user journey end-to-end. Tester acts as an end user with no knowledge of internal code.<br><br>
+
+        <strong>d. REST API → Grey-Box</strong><br>
+        Tester knows the API contract (endpoint URLs, request/response format, HTTP status codes) but does not have full backend implementation access.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 4</span><h3>Static vs. Dynamic Classification</h3></div>
+    <div class="q">
+      <div class="q-text">Classify each as Static (S), Dynamic (D), or Both (B):<br>
+      1. Running pytest on a Python module<br>
+      2. Using SonarQube on the GitHub repo<br>
+      3. Peer walkthrough of a design document<br>
+      4. Load test with JMeter at 1000 concurrent users<br>
+      5. ESLint checking JavaScript for undefined variables<br>
+      6. Fagan Inspection of requirements specification<br>
+      7. Running Selenium automated browser tests<br>
+      8. Reviewing SQL queries for injection vulnerabilities</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <table style="font-size:12px;">
+          <tr><th>#</th><th>Item</th><th>Classification</th><th>Why</th></tr>
+          <tr><td>1</td><td>Running pytest</td><td><strong>D — Dynamic</strong></td><td>Software is executed; outputs are checked at runtime</td></tr>
+          <tr><td>2</td><td>Using SonarQube</td><td><strong>S — Static</strong></td><td>Static analysis tool; analyses source code without running it</td></tr>
+          <tr><td>3</td><td>Peer walkthrough</td><td><strong>S — Static</strong></td><td>Manual review of an artefact; no execution involved</td></tr>
+          <tr><td>4</td><td>Load test with JMeter</td><td><strong>D — Dynamic</strong></td><td>Software executed under load; runtime performance is observed</td></tr>
+          <tr><td>5</td><td>ESLint checking JS</td><td><strong>S — Static</strong></td><td>Automated static analysis; code is not run</td></tr>
+          <tr><td>6</td><td>Fagan Inspection</td><td><strong>S — Static</strong></td><td>Formal review of a document; no execution required</td></tr>
+          <tr><td>7</td><td>Selenium tests</td><td><strong>D — Dynamic</strong></td><td>Browser and application are executed; UI behaviour is observed</td></tr>
+          <tr><td>8</td><td>Reviewing SQL queries</td><td><strong>B — Both</strong></td><td>Static: manual code review / SAST tools. Dynamic: penetration testing actually sends malicious SQL payloads.</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== EXAM QUESTIONS ===== -->
+<div class="page container" id="page-questions">
+
+  <p style="font-size:14px;color:var(--muted);margin-bottom:1.5rem;">Click any question to reveal the model answer. CLO-1 (Remember) and CLO-2 (Understand) levels.</p>
+
+  <div class="q-section">
+    <h2>📝 CLO-1 — Remember</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">1</span>
+        <span class="q-text">Define the four testing scopes and state the order in which they are typically executed in the V-Model.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">4 Marks</span>
+        <p><strong>Order:</strong> Unit Testing → Integration Testing → System Testing → Acceptance Testing<br><br>
+        <strong>Unit:</strong> Tests individual functions/methods in isolation by the developer.<br>
+        <strong>Integration:</strong> Tests interactions between 2+ modules.<br>
+        <strong>System:</strong> Tests the complete product against requirements in a production-like environment.<br>
+        <strong>Acceptance:</strong> Final testing by end users/stakeholders to confirm business needs are met.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">2</span>
+        <span class="q-text">Name all five types of Test Doubles and state what makes each unique.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">5 Marks</span>
+        <p><strong>Stub</strong> — returns pre-configured fixed values, no logic.<br>
+        <strong>Mock</strong> — records calls and allows assertions on how it was called.<br>
+        <strong>Fake</strong> — a working simplified implementation not suitable for production (e.g., in-memory DB).<br>
+        <strong>Spy</strong> — wraps a real object and records calls transparently.<br>
+        <strong>Dummy</strong> — passed as a required parameter but never actually used or called.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">3</span>
+        <span class="q-text">What do the letters AAA stand for in the AAA pattern? What happens in each phase?</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">3 Marks</span>
+        <p><strong>Arrange:</strong> Set up preconditions — create objects, configure stubs/mocks, prepare input data.<br>
+        <strong>Act:</strong> Execute the behaviour under test — call the single function or method being tested.<br>
+        <strong>Assert:</strong> Verify the outcome — check that actual result equals expected result; one assertion preferred.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">4</span>
+        <span class="q-text">List the four integration strategies. For each, state whether it uses stubs, drivers, or neither.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">4 Marks</span>
+        <p><strong>Big Bang</strong> — neither (all modules integrated at once).<br>
+        <strong>Top-Down</strong> — uses Stubs (for lower-level modules not yet ready).<br>
+        <strong>Bottom-Up</strong> — uses Drivers (for upper-level modules not yet ready).<br>
+        <strong>Sandwich</strong> — uses both Stubs AND Drivers simultaneously.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">5</span>
+        <span class="q-text">Name the four sub-types of Acceptance Testing and state who performs each.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">4 Marks</span>
+        <p><strong>UAT (User Acceptance Testing)</strong> — performed by end users/business stakeholders.<br>
+        <strong>Alpha Testing</strong> — performed by the internal development team at the developer's site.<br>
+        <strong>Beta Testing</strong> — performed by selected external users in a real environment.<br>
+        <strong>Contract Acceptance Testing</strong> — performed by the customer/client team to verify contractual deliverables.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-section">
+    <h2>🔬 CLO-2 — Understand</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num apply">6</span>
+        <span class="q-text">Explain how the V-Model maps development phases to testing phases. Why is this mapping useful?</span>
+        <span class="q-type type-apply">Apply</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span>
+        <p>In the V-Model, each left-arm development phase has a corresponding right-arm test phase: Requirements Analysis ↔ Acceptance Testing; System Design ↔ System Testing; Architectural Design ↔ Integration Testing; Module Design ↔ Unit Testing.<br><br>
+        Tests are planned early (during the design phase) and executed later (when the code is built). This is useful because: (1) testers understand requirements before implementation; (2) test cases are prepared in parallel with development, saving time; (3) defects in design can be caught before coding begins.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num apply">7</span>
+        <span class="q-text">What is the difference between Equivalence Partitioning and Boundary Value Analysis? When would you use each?</span>
+        <span class="q-type type-apply">Apply</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span>
+        <p><strong>Equivalence Partitioning (EP):</strong> Divides the input domain into classes expected to behave identically. Test one representative value per class to reduce total test cases while maintaining coverage. Use when there is a large input domain.<br><br>
+        <strong>Boundary Value Analysis (BVA):</strong> Tests at and around the edges (boundaries) of equivalence partitions — where defects concentrate. Complements EP. Use for all numeric ranges.<br><br>
+        They work together: EP identifies the partitions; BVA then tests the boundaries of each partition.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num apply">8</span>
+        <span class="q-text">Why is Statement Coverage considered a weaker coverage criterion than Branch Coverage? Illustrate with an example.</span>
+        <span class="q-type type-apply">Apply</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span>
+        <p>Statement Coverage only requires each executable statement to be executed once. It does NOT require that both outcomes (true and false) of conditional statements are tested.<br><br>
+        <strong>Example:</strong> <code>if score >= 50: return 'Pass'</code> — a single test with score=75 achieves 100% statement coverage if there is no else branch written. But if there is an else branch, statement coverage alone might miss it.<br><br>
+        <strong>Branch Coverage</strong> requires both the true AND false branch of every decision to be executed. It subsumes statement coverage. Two tests — score=75 (pass) and score=30 (fail) — achieve 100% branch coverage, catching defects in both paths.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num apply">9</span>
+        <span class="q-text">Explain why Static Testing is considered more cost-effective than Dynamic Testing when applied early in the development lifecycle. Cite the relevant finding.</span>
+        <span class="q-type type-apply">Apply</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span>
+        <p>Static testing (reviews, inspections, static analysis) finds defects in artefacts (requirements, design, code) without executing the software. When a defect is found early — such as in the requirements specification — it can be fixed by changing a document before any code is written.<br><br>
+        According to Boehm (1981), defects found at the requirements stage cost 10–100× less to fix than the same defects found in production. This is because production defects require: finding the root cause in code, fixing it, retesting, re-deploying, and potentially compensating affected users.<br><br>
+        Additionally, Fagan Inspections have been shown to find 60–90% of defects before execution.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-section">
+    <h2>🎭 Scenario-Based Questions</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num scenario">10</span>
+        <span class="q-text">SCENARIO: A developer writes a function <code>calculate_tax(income, country)</code>. Unit tests pass. The function is then integrated with a <code>CurrencyConverter</code> module. A bug is discovered where the tax is calculated on the unconverted income (USD) instead of the converted local currency. (a) At which testing scope was this defect caught? (b) What type of test double would have been used in the unit test for <code>calculate_tax</code>, and why didn't it catch this bug?</span>
+        <span class="q-type type-scenario">Scenario</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span>
+        <p><strong>(a)</strong> This defect was caught at <strong>Integration Testing</strong> scope. The unit tests for calculate_tax used an isolated test double for CurrencyConverter. Only when the real modules were combined did the incorrect data flow (wrong currency value being passed) become apparent.<br><br>
+        <strong>(b)</strong> A <strong>Stub</strong> was used in the unit test — it returned a hard-coded converted value regardless of input. This meant the unit test of calculate_tax always received the "correct" currency format. The real CurrencyConverter was not exercised. Unit tests confirm individual module logic; they cannot detect interface mismatches between modules — that is precisely what integration testing is for.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num scenario">11</span>
+        <span class="q-text">SCENARIO: You are testing a hospital patient management system. The medication dosage calculator must comply with IEC 61508 safety standards. (a) Which testing approach should you use? (b) Which coverage criterion is required? (c) Who should perform this testing?</span>
+        <span class="q-type type-scenario">Scenario</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span>
+        <p><strong>(a)</strong> <strong>White-Box testing</strong> — because the internal logic of the dosage calculator must be fully verified. We cannot rely on black-box testing alone for safety-critical systems, as we need to confirm every code path computes the correct dosage.<br><br>
+        <strong>(b)</strong> <strong>MC/DC (Modified Condition/Decision Coverage) at 100%</strong> is required. IEC 61508 (safety standard for functional safety in electrical/electronic systems) mandates MC/DC to ensure each condition independently affects the decision outcome — critical when wrong dosage can harm patients.<br><br>
+        <strong>(c)</strong> The <strong>QA team</strong> or a specialist safety testing team performs this — not end users. They need code access and coverage tools.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num scenario">12</span>
+        <span class="q-text">SCENARIO: A QA team is testing a food delivery mobile app. For each task below, select the most appropriate testing approach (Black-Box, White-Box, or Grey-Box) and justify: (a) Verifying that the address validation rejects P.O. boxes. (b) Ensuring the route optimisation algorithm visits all delivery stops efficiently. (c) Testing the REST API that connects the app to the restaurant backend.</span>
+        <span class="q-type type-scenario">Scenario</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">9 Marks</span>
+        <p><strong>(a) Black-Box</strong> — the tester enters addresses (with and without P.O. box formats) and checks the output (accepted/rejected). No knowledge of validation logic internals is needed. Equivalence partitioning and BVA apply.<br><br>
+        <strong>(b) White-Box</strong> — the route optimisation algorithm contains complex internal logic (graph traversal, cost functions, conditions). To verify correctness and efficiency, the tester must examine code paths and ensure all branches and conditions are exercised. Path and branch coverage are required.<br><br>
+        <strong>(c) Grey-Box</strong> — the tester knows the API contract (endpoints, request/response format, authentication mechanism) but does not have access to the full backend implementation. Real HTTP calls are made with valid and invalid payloads, leveraging partial knowledge of the system architecture.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== QUICK REVISION ===== -->
+<div class="page container" id="page-cheatsheet">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">✨</div>
+      <h2>Quick Revision — Key Facts</h2>
+    </div>
+    <div class="card-body">
+      <h4>The 4 Testing Scopes (V-Model Order)</h4>
+      <div class="key-point"><span class="kp-icon">1</span><div class="kp-text"><span class="kp-bold">Unit Testing:</span> Single function/method, isolated, developer-written, very fast (ms), high automation</div></div>
+      <div class="key-point"><span class="kp-icon">2</span><div class="kp-text"><span class="kp-bold">Integration Testing:</span> 2+ modules, interfaces & data flows, dev/QA, strategies: Big Bang / Top-Down (stubs) / Bottom-Up (drivers) / Sandwich</div></div>
+      <div class="key-point"><span class="kp-icon">3</span><div class="kp-text"><span class="kp-bold">System Testing:</span> Complete product vs. requirements, production-like environment, black-box, slow, QA team</div></div>
+      <div class="key-point"><span class="kp-icon">4</span><div class="kp-text"><span class="kp-bold">Acceptance Testing:</span> Business use cases, end users/stakeholders, UAT/Alpha/Beta/Contract, slowest, low automation</div></div>
+
+      <hr style="margin:1.5rem 0;">
+
+      <h4>The 5 Test Doubles</h4>
+      <div class="pill-row">
+        <span class="pill"><strong>Stub</strong> → fixed value</span>
+        <span class="pill"><strong>Mock</strong> → verify call</span>
+        <span class="pill"><strong>Fake</strong> → simple impl</span>
+        <span class="pill"><strong>Spy</strong> → wrap real</span>
+        <span class="pill"><strong>Dummy</strong> → unused param</span>
+      </div>
+
+      <h4>The AAA Pattern</h4>
+      <div class="pill-row">
+        <span class="pill"><strong>Arrange</strong> → setup</span>
+        <span class="pill"><strong>Act</strong> → execute</span>
+        <span class="pill"><strong>Assert</strong> → verify</span>
+      </div>
+
+      <h4>Integration Strategies at a Glance</h4>
+      <div class="pill-row">
+        <span class="pill"><strong>Big Bang:</strong> All at once, no test doubles, small systems</span>
+        <span class="pill"><strong>Top-Down:</strong> Stubs, architecture first</span>
+        <span class="pill"><strong>Bottom-Up:</strong> Drivers, utilities first</span>
+        <span class="pill"><strong>Sandwich:</strong> Both stubs & drivers, large systems</span>
+      </div>
+
+      <hr style="margin:1.5rem 0;">
+
+      <h4>Black-Box Techniques</h4>
+      <div class="pill-row">
+        <span class="pill">EP (Equivalence Partitioning)</span>
+        <span class="pill">BVA (Boundary Value Analysis)</span>
+        <span class="pill">Decision Table Testing</span>
+        <span class="pill">Use-Case / Scenario Testing</span>
+      </div>
+
+      <h4>White-Box Coverage (Low → High)</h4>
+      <div class="pill-row">
+        <span class="pill">Statement: 70–80%</span>
+        <span class="pill">Branch: 80–90%</span>
+        <span class="pill">Condition: 85–95%</span>
+        <span class="pill">Path: 100% (rarely feasible)</span>
+        <span class="pill">MC/DC: 100% (safety-critical)</span>
+      </div>
+
+      <h4>Static vs. Dynamic — Quick Reference</h4>
+      <table style="font-size:12px;">
+        <tr><th>Static</th><th>Dynamic</th></tr>
+        <tr><td>No execution needed</td><td>Execution required</td></tr>
+        <tr><td>Reviews, inspections, linters</td><td>Unit tests, system tests, load tests</td></tr>
+        <tr><td>Early in SDLC</td><td>After code is built</td></tr>
+        <tr><td>Finds design/logic flaws</td><td>Finds runtime errors</td></tr>
+        <tr><td>Most cost-effective early</td><td>Validates actual behaviour</td></tr>
+      </table>
+
+      <div class="warning" style="margin-top:1.5rem;">
+        <strong>⚠️ Must-Remember Facts:</strong><br>
+        • Boehm's 1-10-100 rule: defects found at requirements = 10–100× cheaper to fix than in production<br>
+        • Fagan Inspections catch 60–90% of defects before execution<br>
+        • Unit tests cannot catch integration defects<br>
+        • MC/DC 100% required by DO-178C (aviation), EN 50128 (railway), IEC 61508 (safety)<br>
+        • Acceptance Testing has the lowest automation of all 4 scopes
+      </strong>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function showPage(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('page-'+id).classList.add('active');
+    event.target.closest('.nav-tab').classList.add('active');
+  }
+  function toggleAnswer(header){
+    const body=header.nextElementSibling;
+    const tog=header.querySelector('.q-toggle');
+    if(body.classList.contains('open')){
+      body.classList.remove('open');
+      tog.textContent='▼ Show';
+    } else {
+      body.classList.add('open');
+      tog.textContent='▲ Hide';
+    }
+  }
+</script>
+</body>
+</html>

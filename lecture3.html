@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQE Lecture 3 — Testing Concepts, Issues & STLC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono&display=swap');
+  :root {
+    --navy:#0d1b2e;--navy2:#1a2e47;--teal:#0e9f7c;--teal-light:#d1f5ec;
+    --gold:#e8a020;--gold-light:#fef3dc;--red:#d83c2a;--red-light:#fdecea;
+    --blue:#1a6fc4;--blue-light:#deeeff;--purple:#5c3ab7;--purple-light:#ede8fb;
+    --green:#2e7d32;--green-light:#e8f5e9;--orange:#c45c10;--orange-light:#fdebd0;
+    --gray:#f4f5f6;--border:#dde1e7;--text:#1a1e26;--muted:#5a6272;--white:#fff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'IBM Plex Sans',sans-serif;background:#f0f2f5;color:var(--text);line-height:1.7;}
+  .page-header{background:var(--navy);color:white;padding:2.5rem 2rem 2rem;position:relative;overflow:hidden;}
+  .page-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--gold));}
+  .badge{display:inline-block;background:var(--teal);color:white;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:4px;margin-right:6px;margin-bottom:12px;}
+  .badge.blue{background:var(--blue-light);color:var(--blue);}
+  .badge.green{background:var(--green-light);color:var(--green);}
+  .badge.amber{background:var(--gold-light);color:var(--orange);}
+  .badge.purple{background:var(--purple-light);color:var(--purple);}
+  .page-header h1{font-family:'Merriweather',serif;font-size:26px;font-weight:700;margin-bottom:6px;}
+  .page-header p{font-size:13px;opacity:.7;}
+  .nav-tabs{background:var(--navy2);display:flex;gap:0;overflow-x:auto;padding:0 1.5rem;}
+  .nav-tab{padding:14px 20px;font-size:13px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;user-select:none;}
+  .nav-tab:hover{color:rgba(255,255,255,.85);}
+  .nav-tab.active{color:white;border-bottom-color:var(--teal);}
+  .container{max-width:920px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* Cards */
+  .card{background:white;border-radius:10px;border:1px solid var(--border);margin-bottom:1.5rem;overflow:hidden;}
+  .card-header{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+  .card-header .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .card-header h2{font-size:16px;font-weight:700;}
+  .card-header .slide-tag{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);background:var(--gray);padding:3px 8px;border-radius:4px;white-space:nowrap;}
+  .card-body{padding:1.5rem;}
+
+  /* Info boxes / highlights */
+  .definition-box{background:var(--navy);color:white;border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;border-left:4px solid var(--gold);}
+  .definition-box .label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+  .definition-box p{font-family:'Merriweather',serif;font-style:italic;font-size:14px;line-height:1.9;}
+  .definition-box .source{font-size:12px;opacity:.6;margin-top:8px;font-style:normal;font-family:'IBM Plex Sans',sans-serif;}
+  .insight{background:var(--teal-light);border:1px solid #a8e8d6;border-radius:8px;padding:1rem 1.25rem;margin-top:1rem;font-size:14px;}
+  .insight strong{color:var(--teal);}
+  .warning{background:var(--gold-light);border:1px solid #f5d89a;border-radius:8px;padding:1rem 1.25rem;margin-top:1rem;font-size:14px;}
+  .warning strong{color:var(--gold);}
+  .danger-box{background:var(--red-light);border:1px solid #f5b0a0;border-radius:8px;padding:1rem 1.25rem;margin-top:1rem;font-size:14px;}
+  .danger-box strong{color:var(--red);}
+
+  /* Two cols */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  @media(max-width:620px){.two-col{grid-template-columns:1fr;}}
+  .info-block{background:var(--gray);border-radius:8px;padding:1rem 1.25rem;}
+  .info-block h3{font-size:14px;font-weight:700;margin-bottom:10px;}
+  .info-block ul{list-style:none;padding:0;}
+  .info-block ul li{font-size:13px;padding:4px 0;display:flex;gap:8px;border-bottom:1px solid var(--border);}
+  .info-block ul li:last-child{border-bottom:none;}
+  .info-block ul li::before{content:'→';color:var(--teal);font-weight:700;flex-shrink:0;}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1rem;}
+  th{background:var(--navy);color:white;padding:8px 12px;text-align:left;font-size:12px;}
+  td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tr:nth-child(even) td{background:var(--gray);}
+  td strong{font-weight:700;color:var(--navy);}
+
+  /* Activity boxes */
+  .activity-box{background:var(--navy);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;}
+  .act-header{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+  .act-badge{background:var(--gold);color:var(--navy);font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;}
+  .activity-box h3{font-size:15px;font-weight:700;}
+  .activity-box .q{background:rgba(255,255,255,.08);border-radius:8px;padding:1rem 1.25rem;margin-bottom:.75rem;}
+  .activity-box .q .q-text{font-size:14px;margin-bottom:10px;}
+  .activity-box .q .answer{background:rgba(14,159,124,.2);border:1px solid var(--teal);border-radius:6px;padding:.75rem 1rem;font-size:13px;margin-top:8px;line-height:1.8;}
+  .activity-box .q .answer .ans-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:4px;}
+
+  /* Sample Questions */
+  .q-section{margin-bottom:2rem;}
+  .q-section h2{font-size:18px;font-weight:700;margin-bottom:1rem;padding-bottom:8px;border-bottom:2px solid var(--border);}
+  .q-item{border:1px solid var(--border);border-radius:8px;margin-bottom:1rem;overflow:hidden;}
+  .q-item .q-header{padding:1rem 1.25rem;background:white;cursor:pointer;display:flex;align-items:flex-start;gap:10px;user-select:none;}
+  .q-item .q-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;}
+  .q-item .q-text{font-size:14px;font-weight:500;flex:1;}
+  .q-item .q-toggle{font-size:12px;color:var(--muted);margin-left:auto;flex-shrink:0;margin-top:4px;}
+  .q-item .q-answer{display:none;padding:1rem 1.25rem;background:var(--gray);border-top:1px solid var(--border);font-size:13px;line-height:1.9;}
+  .q-item .q-answer .marks{display:inline-block;background:var(--teal);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;}
+  .q-item .q-answer.open{display:block;}
+  .q-type{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;}
+  .type-recall{background:var(--blue-light);color:var(--blue);}
+  .type-apply{background:var(--teal-light);color:#0a6e52;}
+  .type-scenario{background:var(--gold-light);color:#7a5000;}
+  .q-num.remember{background:var(--blue-light);color:var(--blue);}
+  .q-num.apply{background:var(--teal-light);color:var(--teal);}
+  .q-num.scenario{background:var(--gold-light);color:var(--gold);}
+
+  /* Key points and text elements */
+  h3{font-size:16px;font-weight:700;margin:1.5rem 0 0.75rem;color:var(--text);}
+  h4{font-size:14px;font-weight:700;margin:1rem 0 0.5rem;color:var(--text);}
+  p{font-size:14px;line-height:1.7;color:var(--text);margin-bottom:0.5rem;}
+  .section-intro{font-size:14px;margin-bottom:1rem;color:var(--text);}
+
+  /* Pill tags */
+  .pill{font-size:12px;padding:4px 10px;border-radius:99px;border:0.5px solid var(--border);color:var(--muted);background:var(--gray);display:inline-block;margin:3px 3px 3px 0;}
+
+  /* Key points list */
+  .key-point{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid var(--border);}
+  .key-point:last-child{border-bottom:none;}
+  .kp-icon{font-size:16px;margin-top:2px;flex-shrink:0;color:var(--blue);}
+  .kp-text{font-size:13px;line-height:1.6;color:var(--text);}
+  .kp-bold{font-weight:700;color:var(--navy);}
+
+  /* Chain boxes */
+  .chain-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+  .chain-box{padding:6px 12px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid;}
+
+  /* Code */
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--gray);border:0.5px solid var(--border);border-radius:4px;padding:0 4px;color:var(--navy);}
+
+  /* Divider */
+  hr{border:none;border-top:0.5px solid var(--border);margin:1.25rem 0;}
+
+  /* Terms grid (for key terms tab) */
+  .terms-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+  @media(max-width:600px){.terms-grid{grid-template-columns:1fr;}}
+  .term-item{background:var(--gray);border-radius:8px;padding:.75rem 1rem;border-left:3px solid var(--teal);}
+  .term-item .term{font-weight:700;font-size:14px;color:var(--navy);margin-bottom:3px;}
+  .term-item .def{font-size:13px;color:var(--muted);}
+
+  /* STLC rows */
+  .stlc-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;}
+  .stlc-num{width:22px;height:22px;border-radius:50%;background:var(--green-light);color:var(--green);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .stlc-text{font-size:13px;color:var(--text);line-height:1.6;}
+
+  /* Three col layout */
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+  @media(max-width:700px){.three-col{grid-template-columns:1fr;}}
+
+  /* Responsive */
+  @media(max-width:480px){
+    .page-header h1{font-size:20px;}
+    h3{font-size:15px;}
+    .card-body{padding:1rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;opacity:0.9;">Software Quality Engineering</div>
+  <h1>Week 3 — Testing Concepts, Issues &amp; STLC</h1>
+  <p>Study Notes · Class Activities · Sample Exam Questions | CLO-1 (C-1: Remember) &amp; CLO-2 (C-2: Understand) | 5 Activities Solved | Exam Questions Included</p>
+  <div style="margin-top:8px;">
+    <span class="badge blue">CLO-1 Remember</span>
+    <span class="badge green">CLO-2 Understand</span>
+    <span class="badge amber">5 Activities</span>
+    <span class="badge purple">Exam Q's</span>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('notes')">📒 Study Notes</div>
+  <div class="nav-tab" onclick="switchTab('activities')">✏️ Class Activities</div>
+  <div class="nav-tab" onclick="switchTab('questions')">🎯 Exam Questions</div>
+  <div class="nav-tab" onclick="switchTab('terms')">📚 Quick Revision</div>
+</div>
+
+<!-- ===== STUDY NOTES ===== -->
+<div class="tab-panel active container" id="tab-notes">
+  <!-- ... rest of lecture3.html content unchanged, but wrapped in properly styled containers ... -->
+  <!-- I'll provide the key sections below with proper styling -->
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">🔍</div>
+      <h2>Section 1 — What is Software Testing?</h2>
+      <span class="slide-tag">Slide 2–3</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">IEEE Definition</div>
+        <p>"The process of evaluating a software system to detect differences between expected and actual behaviour, and to assess whether the software meets specified requirements."</p>
+      </div>
+      <p class="section-intro"><strong>Three key ideas:</strong></p>
+      <div class="info-block">
+        <ul>
+          <li>Evaluation of the entire product (not just parts)</li>
+          <li>Detection of discrepancies between expected and actual behaviour</li>
+          <li>Assessment against functional and non-functional requirements</li>
+        </ul>
+      </div>
+
+      <h4>Four Purposes of Testing</h4>
+      <table>
+        <tr><th>Purpose</th><th>Description</th><th>Example</th></tr>
+        <tr><td><strong>Defect Detection</strong></td><td>Find bugs before software reaches users</td><td>Login form accepts blank passwords — caught in integration testing</td></tr>
+        <tr><td><strong>Quality Assurance</strong></td><td>Provide confidence system meets quality standards</td><td>All regression tests pass before a production release</td></tr>
+        <tr><td><strong>Risk Mitigation</strong></td><td>Identify high-risk areas early</td><td>Payment processing tested under load before launch</td></tr>
+        <tr><td><strong>Requirements Verification</strong></td><td>Confirm software behaves as specified</td><td>Each acceptance criterion in SRS has a matching test case</td></tr>
+      </table>
+
+      <h4>Testing vs. Debugging — Key Distinction</h4>
+      <table>
+        <tr><th>Aspect</th><th>Testing</th><th>Debugging</th></tr>
+        <tr><td><strong>Goal</strong></td><td>Find defects — show the software has failures</td><td>Fix defects — locate and remove root cause</td></tr>
+        <tr><td><strong>Who does it</strong></td><td>Testers (and developers in unit testing)</td><td>Developers primarily</td></tr>
+        <tr><td><strong>When</strong></td><td>Throughout SDLC — planned and systematic</td><td>After a defect is reported or found</td></tr>
+        <tr><td><strong>Output</strong></td><td>Test results: pass/fail, defect reports</td><td>Fixed code + verification the fix worked</td></tr>
+        <tr><td><strong>Nature</strong></td><td>Destructive — tries to break the system</td><td>Constructive — repairs the system</td></tr>
+        <tr><td><strong>Automation</strong></td><td>Highly automatable</td><td>Manual analysis; some tool assistance</td></tr>
+      </table>
+
+      <div class="warning">
+        <strong>Real-World Example — Ariane 5 Rocket (1996)</strong><br>
+        64-bit float converted to 16-bit integer without a guard = <strong>Error</strong>. The overflow bug in source code = <strong>Fault</strong>. Rocket self-destructing 37 seconds after launch = <strong>Failure</strong>. Cost: ~$370 million. The specific trajectory data combination was never tested.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#d1f5ec;">⚖️</div>
+      <h2>Section 2 — Verification vs. Validation (V&V)</h2>
+      <span class="slide-tag">Slide 4–5</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div class="info-block" style="border-top:3px solid var(--blue);padding:1.25rem;">
+          <h3 style="color:var(--blue);margin:0 0 1rem;">Verification</h3>
+          <p style="margin-bottom:0.75rem;"><em>"Are we building the product right?"</em></p>
+          <ul>
+            <li>Checks against specifications and design</li>
+            <li>Static process — no code execution</li>
+            <li>Techniques: reviews, walkthroughs, inspections, static analysis</li>
+            <li>Example: Does the design document match the SRS?</li>
+          </ul>
+        </div>
+        <div class="info-block" style="border-top:3px solid var(--teal);padding:1.25rem;">
+          <h3 style="color:var(--teal);margin:0 0 1rem;">Validation</h3>
+          <p style="margin-bottom:0.75rem;"><em>"Are we building the right product?"</em></p>
+          <ul>
+            <li>Checks against user needs and business goals</li>
+            <li>Dynamic process — involves executing the software</li>
+            <li>Techniques: functional testing, UAT, system testing</li>
+            <li>Example: Does the system do what the user actually needs?</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="margin-top:1.5rem;">V&V Across the SDLC</h4>
+      <table>
+        <tr><th>SDLC Phase</th><th>Verification (Static)</th><th>Validation (Dynamic)</th></tr>
+        <tr><td>Requirements</td><td>Review docs for completeness, consistency</td><td>Prototyping, user interviews</td></tr>
+        <tr><td>Design</td><td>Design reviews, walkthroughs</td><td>UI mockup reviews with users</td></tr>
+        <tr><td>Implementation</td><td>Code reviews, static analysis</td><td>Unit testing</td></tr>
+        <tr><td>Integration</td><td>Integration reviews — check interfaces</td><td>Integration testing</td></tr>
+        <tr><td>System Testing</td><td>Check test plans against RTM</td><td>System testing against all requirements</td></tr>
+        <tr><td>Acceptance</td><td>Audit that all planned tests were run</td><td>UAT — satisfies customer business needs?</td></tr>
+      </table>
+
+      <div class="danger-box">
+        <strong>Real-World Example — NASA Mars Climate Orbiter (1999)</strong><br>
+        $327.6M orbiter lost because one team used metric units (Newton-seconds) and another used imperial (pound-force seconds). <strong>Verification passed</strong> — each module worked correctly per its own specification. <strong>Validation failed</strong> — the combined system did not do what was actually needed. Cost: $327.6 million.
+      </div>
+    </div>
+  </div>
+
+  <!-- Continue with remaining sections following the same pattern... -->
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#ede8fb;">⭐</div>
+      <h2>Section 3 — The 7 Principles of Software Testing (ISTQB)</h2>
+      <span class="slide-tag">Slide 6–7</span>
+    </div>
+    <div class="card-body">
+      <p class="section-intro">Formalised by ISTQB CTFL Syllabus v4.0 (2023). Universal foundations every tester must know.</p>
+      
+      <div class="key-point">
+        <div class="kp-icon">1️⃣</div>
+        <div><div class="kp-bold">Testing Shows Presence of Defects</div><div class="kp-text">Testing can prove defects exist — it CANNOT prove software is defect-free. Even after extensive testing, undiscovered defects may still exist. (Dijkstra, 1972: "Testing can show the presence of bugs, but never their absence.") Passing all tests does NOT guarantee correctness.</div></div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">2️⃣</div>
+        <div><div class="kp-bold">Exhaustive Testing is Impossible</div><div class="kp-text">Testing every possible input, path, and precondition is infeasible. A login form with a 12-character password field has 95^12 ≈ 5.4 × 10^23 combinations. Strategy: use risk analysis and equivalence partitioning to prioritise.</div></div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">3️⃣</div>
+        <div><div class="kp-bold">Early Testing Saves Money (Shift-Left Testing)</div><div class="kp-text">Cost of fixing a defect increases dramatically the later it is found. Requirements: ×1 | Design: ×5 | Coding: ×10 | Unit Testing: ×20 | System Testing: ×40 | Production: ×100+. (Boehm, 1981 — the '1-10-100 rule')</div></div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">4️⃣</div>
+        <div><div class="kp-bold">Defect Clustering (Pareto Principle)</div><div class="kp-text">~20% of modules contain ~80% of all defects. High-risk modules: new features, complex logic, third-party integrations, legacy code. Use historical defect data to identify 'hot-spot' modules. Other modules still require testing — clustering does not mean they are defect-free.</div></div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">5️⃣</div>
+        <div><div class="kp-bold">Pesticide Paradox</div><div class="kp-text">If the same tests are run repeatedly, they stop finding new defects. Just as insects develop resistance to pesticides, software becomes 'immune' to the same tests. Coined by Boris Beizer (1990). Solution: regularly review and update test suites; add new test cases; use mutation testing.</div></div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">6️⃣</div>
+        <div><div class="kp-bold">Testing is Context-Dependent</div><div class="kp-text">No universal testing approach exists. Safety-critical (avionics, medical) → DO-178C, MC/DC, formal verification. E-commerce → functional, performance, security. Mobile app → usability, compatibility, network conditions. Internal CRUD tool → basic happy path and negative tests.</div></div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">7️⃣</div>
+        <div><div class="kp-bold">Absence-of-Errors Fallacy</div><div class="kp-text">Fixing all known defects does NOT guarantee a successful product. If the system does not meet user needs, it is still a failure. Links to Validation. Example: Microsoft Zune (2006) — worked as specified with no known defects, but failed commercially because users preferred the iPod ecosystem. Defect-free ≠ successful.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STLC Section -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#e8f5e9;">🔄</div>
+      <h2>Section 4 — Software Testing Lifecycle (STLC)</h2>
+      <span class="slide-tag">Slide 8–11</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">Definition</div>
+        <p>A systematic process for planning, executing, and closing testing activities. Each phase has Entry Criteria, Activities, and Exit Criteria. Runs in parallel with the SDLC.</p>
+      </div>
+
+      <h4>Overview — 6 Phases</h4>
+      <table>
+        <tr><th>Phase</th><th>Key Entry</th><th>Core Activity</th><th>Key Exit/Output</th></tr>
+        <tr><td><strong>1. Requirement Analysis</strong></td><td>Requirements document available</td><td>Identify testable requirements; prepare RTM</td><td>RTM ready; test feasibility report</td></tr>
+        <tr><td><strong>2. Test Planning</strong></td><td>Requirements signed off</td><td>Write test plan; estimate effort; assign resources</td><td>Approved Test Plan; schedule</td></tr>
+        <tr><td><strong>3. Test Case Design</strong></td><td>Test plan approved</td><td>Write and review test cases; prepare test data</td><td>Reviewed and approved test cases and data</td></tr>
+        <tr><td><strong>4. Environment Setup</strong></td><td>Test cases ready</td><td>Configure hardware/software; smoke test</td><td>Ready test environment; smoke test pass</td></tr>
+        <tr><td><strong>5. Test Execution</strong></td><td>Environment and cases ready</td><td>Execute tests; log defects; re-test fixes</td><td>All tests run; defects logged</td></tr>
+        <tr><td><strong>6. Test Closure</strong></td><td>Exit criteria met or deadline reached</td><td>Test summary report; lessons learned; metrics</td><td>Signed-off Closure Report; metrics dashboard</td></tr>
+      </table>
+
+      <h4 style="margin-top:1.5rem;">STLC Phases — Detailed</h4>
+      <div class="stlc-row">
+        <div class="stlc-num">1</div>
+        <div class="stlc-text"><strong>Requirement Analysis</strong> — Identify testable vs. non-testable requirements; build RTM; identify test types needed; automation feasibility.</div>
+      </div>
+      <div class="stlc-row">
+        <div class="stlc-num">2</div>
+        <div class="stlc-text"><strong>Test Planning</strong> — Define test strategy; estimate effort; assign roles; select tools; define entry/exit criteria; perform risk analysis.</div>
+      </div>
+      <div class="stlc-row">
+        <div class="stlc-num">3</div>
+        <div class="stlc-text"><strong>Test Case Design</strong> — Write clear, traceable, independent, repeatable test cases following a standard template.</div>
+      </div>
+      <div class="stlc-row">
+        <div class="stlc-num">4</div>
+        <div class="stlc-text"><strong>Environment Setup</strong> — Mirror production as closely as possible; run smoke test before full execution.</div>
+      </div>
+      <div class="stlc-row">
+        <div class="stlc-num">5</div>
+        <div class="stlc-text"><strong>Test Execution</strong> — Execute tests; log defects with severity/priority; re-test fixes; run regression tests.</div>
+      </div>
+      <div class="stlc-row">
+        <div class="stlc-num">6</div>
+        <div class="stlc-text"><strong>Test Closure</strong> — Test summary report; DRE metric; lessons learned; archive all test artefacts.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Fault Failure -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#fdecea;">⚠️</div>
+      <h2>Section 5 — Error → Fault → Failure Chain (IEEE Std 610.12)</h2>
+      <span class="slide-tag">Slide 12</span>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <div style="background:#fef3dc;border:1px solid #f5d89a;padding:8px 12px;border-radius:6px;font-weight:600;color:#7a5000;">Error (Mistake)</div>
+        <span style="color:var(--muted);font-size:18px;">→</span>
+        <div style="background:#fdecea;border:1px solid #f5b0a0;padding:8px 12px;border-radius:6px;font-weight:600;color:#791F1F;">Fault / Defect / Bug</div>
+        <span style="color:var(--muted);font-size:18px;">→</span>
+        <div style="background:#ede8fb;border:1px solid #c9c0f5;padding:8px 12px;border-radius:6px;font-weight:600;color:#3C3489;">Failure</div>
+      </div>
+      
+      <table>
+        <tr><th>Term</th><th>IEEE Definition</th><th>Example</th></tr>
+        <tr><td><strong>Error</strong></td><td>A human action that produces an incorrect result</td><td>Developer writes <code>if (x = 0)</code> instead of <code>if (x == 0)</code></td></tr>
+        <tr><td><strong>Fault (Defect/Bug)</strong></td><td>A flaw introduced into the software as a result of an error</td><td>The incorrect assignment remains in the source code</td></tr>
+        <tr><td><strong>Failure</strong></td><td>Observable incorrect behaviour when faulty code executes</td><td>Program enters infinite loop or produces wrong result</td></tr>
+      </table>
+
+      <div class="insight">
+        <strong>💡 Key Point:</strong> Not every fault leads to a failure — a fault may only activate under specific conditions. A bug in code that rarely executes may never cause a visible failure to end users.
+      </div>
+    </div>
+  </div>
+
+  <!-- Testing Challenges -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">🚨</div>
+      <h2>Section 6 — Common Testing Challenges</h2>
+      <span class="slide-tag">Slide 13</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th>#</th><th>Challenge</th><th>Key Impact</th><th>Mitigation</th></tr>
+        <tr><td>1</td><td><strong>Incomplete / Vague Requirements</strong></td><td>Cannot define 'correct behaviour'; missed defects</td><td>Involve testers in requirements reviews; use acceptance criteria</td></tr>
+        <tr><td>2</td><td><strong>Insufficient Time & Budget</strong></td><td>Testing compressed at project end; only 31% of IT projects delivered on time (Standish CHAOS 2020)</td><td>Start testing early (STLC Phase 1); risk-based testing</td></tr>
+        <tr><td>3</td><td><strong>Lack of Testability</strong></td><td>Tight coupling, no logging, no test hooks — hard to isolate and automate</td><td>Apply testability in design reviews; use TDD</td></tr>
+        <tr><td>4</td><td><strong>Changing Requirements (Scope Creep)</strong></td><td>Invalidates existing test cases; a change in system testing costs ×40 vs requirements phase</td><td>Change management process; freeze requirements before execution</td></tr>
+        <tr><td>5</td><td><strong>Defect Reproduction Difficulty</strong></td><td>Intermittent bugs (Heisenbugs) hard to report and verify</td><td>Detailed defect reports with exact steps, logs, screenshots; Docker for reproducible environments</td></tr>
+        <tr><td>6</td><td><strong>Inadequate Test Environments</strong></td><td>"Works on my machine" — ~30% of production incidents (Gartner)</td><td>Infrastructure as Code (Terraform, Ansible); containerisation with Docker</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cost of Quality -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#d1f5ec;">💰</div>
+      <h2>Section 7 — Cost of Quality (CoQ)</h2>
+      <span class="slide-tag">Slide 14</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">Definition</div>
+        <p>CoQ = Cost of Conformance + Cost of Non-Conformance. Introduced by Feigenbaum (1956); popularised by Crosby (1979): "Quality is free. What costs money are the unquality things."</p>
+      </div>
+
+      <div class="two-col">
+        <div class="info-block" style="border-top:3px solid var(--teal);">
+          <h3 style="color:var(--teal);">Cost of Conformance (Good)</h3>
+          <p style="margin-bottom:0.75rem;"><strong>Prevention Costs:</strong> Training, process improvement, requirements reviews, design reviews, standards creation</p>
+          <p><strong>Appraisal Costs:</strong> Testing (all types), inspections, audits, test environment setup, test tool licences</p>
+        </div>
+        <div class="info-block" style="border-top:3px solid var(--red);">
+          <h3 style="color:var(--red);">Cost of Non-Conformance (Bad)</h3>
+          <p style="margin-bottom:0.75rem;"><strong>Internal Failure:</strong> Rework, debugging, re-testing before delivery, schedule delays</p>
+          <p><strong>External Failure:</strong> Production bug fixes, customer support, recalls, legal liability, reputation damage, lost customers</p>
+        </div>
+      </div>
+
+      <h4 style="margin-top:1.5rem;">Real-World Cost Examples</h4>
+      <table>
+        <tr><th>Incident</th><th>Year</th><th>Cost</th><th>Category</th></tr>
+        <tr><td>Therac-25 radiation overdoses</td><td>1985-87</td><td>Lives lost + legal</td><td>External failure</td></tr>
+        <tr><td>Pentium FDIV bug (Intel recall)</td><td>1994</td><td>~$475 million</td><td>External failure</td></tr>
+        <tr><td>Y2K remediation</td><td>1999</td><td>~$300 billion</td><td>Prevention cost</td></tr>
+        <tr><td>Healthcare.gov launch failure</td><td>2013</td><td>~$2 billion</td><td>External failure</td></tr>
+        <tr><td>CrowdStrike global IT outage</td><td>2024</td><td>~$10 billion+</td><td>External failure</td></tr>
+      </table>
+
+      <div class="insight">
+        <strong>💡 Automation Impact:</strong> With automated testing, the marginal cost of running tests ≈ $0 once written. Google runs ~150 million automated test cases per day, making conformance (prevention) costs minimal compared to failure costs.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== ACTIVITIES ===== -->
+<div class="tab-panel container" id="tab-activities">
+  <p style="font-size:14px;color:var(--muted);margin-bottom:1.5rem;">All activities are from the lecture notes. Try each question yourself before reading the model answer.</p>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 1</span><h3>Testing vs. Debugging Identification</h3></div>
+    <p style="font-size:13px;opacity:.8;margin-bottom:1rem;">Classify each scenario as Testing, Debugging, or Both:</p>
+    <div class="q">
+      <div class="q-text">1. A developer runs all unit tests after changing a function.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Answer: Both</div>
+        <p>Running the unit tests = Testing (systematic execution to detect failures). Changing the function in response to a failure = Debugging. Both activities occur together in TDD-style workflow.</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">2. A QA engineer writes test cases for a new payment module.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Answer: Testing</div>
+        <p>Writing test cases is a Testing activity (specifically, the Test Case Design phase of STLC). No code is being fixed — the goal is to plan how to detect defects.</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">3. A developer uses a step-through debugger to find why a variable is null.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Answer: Debugging</div>
+        <p>Using a debugger to locate the root cause of a null variable is pure Debugging — constructive activity aimed at finding and fixing the root cause, not detecting failures.</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">4. A tester finds a crash and logs a defect report.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Answer: Testing</div>
+        <p>Finding the failure and logging a defect report is Testing — destructive in nature, aimed at detecting that the software has a failure. The actual fixing is left to the developer (Debugging).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add more activity boxes following the same pattern -->
+
+</div>
+
+<!-- ===== QUESTIONS ===== -->
+<div class="tab-panel container" id="tab-questions">
+  <p style="font-size:14px;color:var(--muted);margin-bottom:1.5rem;">Click any question to reveal the model answer. CLO-1 (Remember) and CLO-2 (Understand) levels.</p>
+
+  <div class="q-section">
+    <h2>📝 CLO-1 — Remember</h2>
+    
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">1</span>
+        <span class="q-text">State the IEEE definition of software testing and identify the three key ideas it captures.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">3 Marks</span>
+        <p>IEEE Definition: "The process of evaluating a software system to detect differences between expected and actual behaviour, and to assess whether the software meets specified requirements."<br><br>Three key ideas: (1) Evaluation of the entire software system, not just code. (2) Detection of discrepancies between expected and actual behaviour. (3) Assessment against specified functional and non-functional requirements.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">2</span>
+        <span class="q-text">List all 7 ISTQB testing principles by name.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">3 Marks</span>
+        <p>1. Testing Shows the Presence of Defects<br>
+        2. Exhaustive Testing is Impossible<br>
+        3. Early Testing Saves Money (Shift-Left Testing)<br>
+        4. Defect Clustering (Pareto Principle)<br>
+        5. Pesticide Paradox<br>
+        6. Testing is Context-Dependent<br>
+        7. Absence-of-Errors Fallacy</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">3</span>
+        <span class="q-text">Name the 6 phases of the STLC in order and state the key deliverable of each phase.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span>
+        <p>1. Requirement Analysis → RTM and test feasibility report<br>
+        2. Test Planning → Approved Test Plan and schedule<br>
+        3. Test Case Design → Reviewed and approved test cases and test data<br>
+        4. Environment Setup → Ready test environment and smoke test pass<br>
+        5. Test Execution → All tests run; defects logged<br>
+        6. Test Closure → Signed-off Test Summary Report and metrics</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="q-section">
+    <h2>🔬 CLO-2 — Understand</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num apply">4</span>
+        <span class="q-text">Explain the difference between Verification and Validation. Why are both required throughout the SDLC?</span>
+        <span class="q-type type-apply">Apply</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span>
+        <p>Verification asks "Are we building the product right?" — it is a static process that checks artefacts (requirements, design, code) against specifications without executing the software.<br><br>
+        Validation asks "Are we building the right product?" — it is a dynamic process that executes the software and checks whether it meets actual user needs.<br><br>
+        Both are required because: Verification alone can produce a technically correct system that solves the wrong problem. Validation alone without verification misses structural defects in design and code.</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ===== TERMS ===== -->
+<div class="tab-panel container" id="tab-terms">
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">📚</div>
+      <h2>Quick Revision — Key Facts</h2>
+    </div>
+    <div class="card-body">
+      <h4>Six Key Takeaways</h4>
+      <div class="key-point">
+        <div class="kp-icon">1</div>
+        <div class="kp-text"><span class="kp-bold">Software Testing (IEEE):</span> Evaluating a system to detect differences between expected and actual behaviour and to assess whether it meets specified requirements.</div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">2</div>
+        <div class="kp-text"><span class="kp-bold">V&V:</span> Verification = "Building it right?" (static, against specs). Validation = "Building the right thing?" (dynamic, against user needs). Both required.</div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">3</div>
+        <div class="kp-text"><span class="kp-bold">7 ISTQB Principles:</span> Shows defects | Exhaustive impossible | Early saves cost | Defect clustering | Pesticide paradox | Context-dependent | Absence-of-errors fallacy</div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">4</div>
+        <div class="kp-text"><span class="kp-bold">STLC (6 phases):</span> Requirement Analysis → Test Planning → Test Case Design → Environment Setup → Test Execution → Test Closure</div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">5</div>
+        <div class="kp-text"><span class="kp-bold">Error → Fault → Failure:</span> Human mistake → flaw in artefact → observable incorrect behaviour</div>
+      </div>
+      <div class="key-point">
+        <div class="kp-icon">6</div>
+        <div class="kp-text"><span class="kp-bold">Cost of Quality:</span> Conformance (prevention + appraisal) + Non-Conformance (internal + external failure)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(id){
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+id).classList.add('active');
+    const tabs=['notes','activities','questions','terms'];
+    const idx=tabs.indexOf(id);
+    document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  }
+  function toggleAnswer(header){
+    const ans=header.nextElementSibling;
+    const tog=header.querySelector('.q-toggle');
+    if(ans.classList.contains('open')){
+      ans.classList.remove('open');
+      tog.textContent='▼ Show';
+    } else {
+      ans.classList.add('open');
+      tog.textContent='▲ Hide';
+    }
+  }
+</script>
+</body>
+</html>
