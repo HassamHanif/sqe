@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQE Lecture 2 — Study Notes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono&display=swap');
+  :root {
+    --navy:#0d1b2e;--navy2:#1a2e47;--teal:#0e9f7c;--teal-light:#d1f5ec;
+    --gold:#e8a020;--gold-light:#fef3dc;--red:#d83c2a;--red-light:#fdecea;
+    --blue:#1a6fc4;--blue-light:#deeeff;--purple:#5c3ab7;--purple-light:#ede8fb;
+    --green:#2e7d32;--green-light:#e8f5e9;--orange:#c45c10;--orange-light:#fdebd0;
+    --gray:#f4f5f6;--border:#dde1e7;--text:#1a1e26;--muted:#5a6272;--white:#fff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'IBM Plex Sans',sans-serif;background:#f0f2f5;color:var(--text);line-height:1.7;}
+  .page-header{background:var(--navy);color:white;padding:2.5rem 2rem 2rem;position:relative;overflow:hidden;}
+  .page-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--gold));}
+  .badge{display:inline-block;background:var(--teal);color:white;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:4px;margin-bottom:12px;}
+  .page-header h1{font-family:'Merriweather',serif;font-size:26px;font-weight:700;margin-bottom:6px;}
+  .page-header p{font-size:13px;opacity:.7;}
+  .nav-tabs{background:var(--navy2);display:flex;gap:0;overflow-x:auto;padding:0 1.5rem;}
+  .nav-tab{padding:14px 20px;font-size:13px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;user-select:none;}
+  .nav-tab:hover{color:rgba(255,255,255,.85);}
+  .nav-tab.active{color:white;border-bottom-color:var(--teal);}
+  .container{max-width:920px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* Cards */
+  .card{background:white;border-radius:10px;border:1px solid var(--border);margin-bottom:1.5rem;overflow:hidden;}
+  .card-header{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+  .card-header .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .card-header h2{font-size:16px;font-weight:700;}
+  .card-header .slide-tag{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);background:var(--gray);padding:3px 8px;border-radius:4px;white-space:nowrap;}
+  .card-body{padding:1.5rem;}
+
+  /* Boxes */
+  .definition-box{background:var(--navy);color:white;border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;border-left:4px solid var(--gold);}
+  .definition-box .label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+  .definition-box p{font-family:'Merriweather',serif;font-style:italic;font-size:14px;line-height:1.9;}
+  .definition-box .source{font-size:12px;opacity:.6;margin-top:8px;font-style:normal;font-family:'IBM Plex Sans',sans-serif;}
+  .insight{background:var(--teal-light);border:1px solid #a8e8d6;border-radius:8px;padding:1rem 1.25rem;margin-top:1rem;font-size:14px;}
+  .insight strong{color:var(--teal);}
+  .warning{background:var(--gold-light);border:1px solid #f5d89a;border-radius:8px;padding:1rem 1.25rem;margin-top:1rem;font-size:14px;}
+  .warning strong{color:var(--gold);}
+  .danger-box{background:var(--red-light);border:1px solid #f5b0a0;border-radius:8px;padding:1rem 1.25rem;margin-top:1rem;font-size:14px;}
+  .danger-box strong{color:var(--red);}
+
+  /* Two cols */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  @media(max-width:620px){.two-col{grid-template-columns:1fr;}}
+  .info-block{background:var(--gray);border-radius:8px;padding:1rem 1.25rem;}
+  .info-block h3{font-size:14px;font-weight:700;margin-bottom:10px;}
+  .info-block ul{list-style:none;padding:0;}
+  .info-block ul li{font-size:13px;padding:4px 0;display:flex;gap:8px;border-bottom:1px solid var(--border);}
+  .info-block ul li:last-child{border-bottom:none;}
+  .info-block ul li::before{content:'→';color:var(--teal);font-weight:700;flex-shrink:0;}
+
+  /* Perspectives / Three Cols */
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+  @media(max-width:700px){.three-col{grid-template-columns:1fr;}}
+  .persp-card{border-radius:8px;padding:1rem 1.25rem;border-top:4px solid;}
+  .persp-card h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+  .persp-card.op{border-color:var(--blue);background:var(--blue-light);} .persp-card.op h3{color:var(--blue);}
+  .persp-card.rev{border-color:var(--teal);background:var(--teal-light);} .persp-card.rev h3{color:var(--teal);}
+  .persp-card.trans{border-color:var(--purple);background:var(--purple-light);} .persp-card.trans h3{color:var(--purple);}
+  .persp-card p{font-size:12px;}
+  .persp-card .factors{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;}
+  .factor-tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;}
+  .op .factor-tag{background:rgba(26,111,196,.15);color:var(--blue);}
+  .rev .factor-tag{background:rgba(14,159,124,.15);color:var(--teal);}
+  .trans .factor-tag{background:rgba(92,58,183,.15);color:var(--purple);}
+
+  /* FCM table */
+  table.fcm{width:100%;border-collapse:collapse;font-size:13px;margin:1rem 0;}
+  table.fcm th{background:var(--navy);color:white;padding:8px 12px;text-align:left;font-size:12px;}
+  table.fcm td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+  table.fcm tr:last-child td{border-bottom:none;}
+  table.fcm tr:nth-child(even) td{background:var(--gray);}
+  table.fcm .bold{font-weight:700;}
+
+  /* FURPS */
+  .furps-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;margin-bottom:1rem;}
+  @media(max-width:700px){.furps-grid{grid-template-columns:repeat(2,1fr);}}
+  .furps-item{border-radius:8px;padding:.85rem .75rem;text-align:center;}
+  .furps-item .letter{font-size:26px;font-weight:700;margin-bottom:4px;}
+  .furps-item .name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+  .f-f{background:#dceefb;} .f-f .letter,.f-f .name{color:var(--blue);}
+  .f-u{background:#d1f5ec;} .f-u .letter,.f-u .name{color:var(--teal);}
+  .f-r{background:#fdecea;} .f-r .letter,.f-r .name{color:var(--red);}
+  .f-p{background:#ede8fb;} .f-p .letter,.f-p .name{color:var(--purple);}
+  .f-s{background:#fef3dc;} .f-s .letter,.f-s .name{color:var(--orange);}
+
+  /* FURPS+ extensions */
+  .ext-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;}
+  @media(max-width:700px){.ext-grid{grid-template-columns:repeat(2,1fr);}}
+  .ext-item{background:var(--gray);border-radius:8px;padding:.85rem .75rem;text-align:center;border-top:3px solid var(--muted);}
+  .ext-item .ename{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+  .ext-item p{font-size:11px;color:var(--muted);}
+
+  /* Big compare table */
+  table.compare{width:100%;border-collapse:collapse;font-size:12px;}
+  table.compare th{padding:9px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+  table.compare th:first-child{background:var(--gray);color:var(--muted);}
+  table.compare th.c1{background:#1a5fa0;color:white;}
+  table.compare th.c2{background:#2e7d32;color:white;}
+  table.compare th.c3{background:#c45c10;color:white;}
+  table.compare th.c4{background:#5c3ab7;color:white;}
+  table.compare td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  table.compare td:first-child{font-weight:700;background:var(--gray);font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);}
+  table.compare tr:last-child td{border-bottom:none;}
+
+  /* CMMI levels */
+  .cmmi-stack{display:flex;flex-direction:column;gap:.5rem;}
+  .cmmi-level{display:flex;align-items:center;gap:1rem;border-radius:8px;padding:.85rem 1.25rem;}
+  .cmmi-level .lvl-num{font-size:22px;font-weight:700;min-width:32px;text-align:center;}
+  .cmmi-level .lvl-name{font-weight:700;font-size:14px;margin-bottom:2px;}
+  .cmmi-level .lvl-desc{font-size:12px;}
+  .lv5{background:#d1f5ec;} .lv5 .lvl-num,.lv5 .lvl-name{color:#0a6e52;}
+  .lv4{background:#dceefb;} .lv4 .lvl-num,.lv4 .lvl-name{color:var(--blue);}
+  .lv3{background:#ede8fb;} .lv3 .lvl-num,.lv3 .lvl-name{color:var(--purple);}
+  .lv2{background:#fef3dc;} .lv2 .lvl-num,.lv2 .lvl-name{color:var(--orange);}
+  .lv1{background:#fdecea;} .lv1 .lvl-num,.lv1 .lvl-name{color:var(--red);}
+
+  /* Product vs Process */
+  .pp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  @media(max-width:620px){.pp-grid{grid-template-columns:1fr;}}
+  .pp-card{border-radius:8px;padding:1.25rem;border-top:4px solid;}
+  .pp-card h3{font-size:14px;font-weight:700;margin-bottom:10px;}
+  .pp-card ul{list-style:none;padding:0;}
+  .pp-card ul li{font-size:13px;padding:5px 0;display:flex;gap:8px;border-bottom:1px solid rgba(0,0,0,.08);}
+  .pp-card ul li:last-child{border-bottom:none;}
+  .pp-card ul li::before{content:'•';font-weight:700;flex-shrink:0;}
+  .prod-card{border-color:var(--blue);background:var(--blue-light);}
+  .prod-card h3{color:var(--blue);}
+  .prod-card ul li::before{color:var(--blue);}
+  .proc-card{border-color:var(--teal);background:var(--teal-light);}
+  .proc-card h3{color:var(--teal);}
+  .proc-card ul li::before{color:var(--teal);}
+
+  /* Context table */
+  table.context{width:100%;border-collapse:collapse;font-size:13px;}
+  table.context th{background:var(--navy2);color:white;padding:8px 12px;text-align:left;font-size:12px;}
+  table.context td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+  table.context tr:last-child td{border-bottom:none;}
+  table.context tr:nth-child(even) td{background:var(--gray);}
+  table.context .rec{font-weight:700;color:var(--teal);}
+
+  /* Activity boxes */
+  .activity-box{background:var(--navy);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;}
+  .act-header{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+  .act-badge{background:var(--gold);color:var(--navy);font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;}
+  .activity-box h3{font-size:15px;font-weight:700;}
+  .activity-box .q{background:rgba(255,255,255,.08);border-radius:8px;padding:1rem 1.25rem;margin-bottom:.75rem;}
+  .activity-box .q .q-text{font-size:14px;margin-bottom:10px;}
+  .activity-box .q .answer{background:rgba(14,159,124,.2);border:1px solid var(--teal);border-radius:6px;padding:.75rem 1rem;font-size:13px;margin-top:8px;line-height:1.8;}
+  .activity-box .q .answer .ans-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:4px;}
+
+  /* Sample Questions */
+  .q-section{margin-bottom:2rem;}
+  .q-section h2{font-size:18px;font-weight:700;margin-bottom:1rem;padding-bottom:8px;border-bottom:2px solid var(--border);}
+  .q-item{border:1px solid var(--border);border-radius:8px;margin-bottom:1rem;overflow:hidden;}
+  .q-item .q-header{padding:1rem 1.25rem;background:white;cursor:pointer;display:flex;align-items:flex-start;gap:10px;user-select:none;}
+  .q-item .q-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;}
+  .q-item .q-text{font-size:14px;font-weight:500;flex:1;}
+  .q-item .q-toggle{font-size:12px;color:var(--muted);margin-left:auto;flex-shrink:0;margin-top:4px;}
+  .q-item .q-answer{display:none;padding:1rem 1.25rem;background:var(--gray);border-top:1px solid var(--border);font-size:13px;line-height:1.9;}
+  .q-item .q-answer .marks{display:inline-block;background:var(--teal);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;}
+  .q-item .q-answer .clo-tag{display:inline-block;background:var(--purple-light);color:var(--purple);font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;margin-left:6px;}
+  .q-item .q-answer.open{display:block;}
+  .q-type{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;}
+  .type-recall{background:var(--blue-light);color:var(--blue);}
+  .type-apply{background:var(--teal-light);color:#0a6e52;}
+  .type-scenario{background:var(--gold-light);color:#7a5000;}
+  .q-num.remember{background:var(--blue-light);color:var(--blue);}
+  .q-num.apply{background:var(--teal-light);color:var(--teal);}
+  .q-num.scenario{background:var(--gold-light);color:var(--gold);}
+
+  /* Key terms */
+  .terms-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+  @media(max-width:600px){.terms-grid{grid-template-columns:1fr;}}
+  .term-item{background:var(--gray);border-radius:8px;padding:.75rem 1rem;border-left:3px solid var(--teal);}
+  .term-item .term{font-weight:700;font-size:14px;color:var(--navy);margin-bottom:3px;}
+  .term-item .def{font-size:13px;color:var(--muted);}
+
+  /* Hierarchy diagram text */
+  .fcm-visual{display:flex;gap:.5rem;align-items:stretch;margin:1rem 0;}
+  .fcm-box{flex:1;border-radius:8px;padding:1rem;text-align:center;}
+  .fcm-box .level{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .fcm-box .content{font-size:13px;}
+  .fcm-arrow{display:flex;align-items:center;font-size:20px;color:var(--muted);padding-top:10px;}
+  .fcm-l1{background:var(--blue-light);border:2px solid var(--blue);}
+  .fcm-l1 .level{color:var(--blue);}
+  .fcm-l2{background:var(--teal-light);border:2px solid var(--teal);}
+  .fcm-l2 .level{color:var(--teal);}
+  .fcm-l3{background:var(--gold-light);border:2px solid var(--gold);}
+  .fcm-l3 .level{color:var(--orange);}
+
+  p.section-intro{font-size:14px;margin-bottom:1rem;color:var(--text);}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="badge">Software Quality Engineering</div>
+  <h1>Week 2 — Software Quality Attributes &amp; Models</h1>
+  <p>Study Notes · Class Activities · Sample Exam Questions | CLO-1 (C-1: Remember) | Instructor: Engr. Asim Javaid</p>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('notes')">📒 Study Notes</div>
+  <div class="nav-tab" onclick="switchTab('activities')">✏️ Class Activities</div>
+  <div class="nav-tab" onclick="switchTab('questions')">🎯 Sample Exam Questions</div>
+  <div class="nav-tab" onclick="switchTab('terms')">📚 Key Terms</div>
+</div>
+
+<!-- ===== STUDY NOTES ===== -->
+<div class="tab-panel active container" id="tab-notes">
+
+  <!-- Why Quality Models -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">❓</div>
+      <h2>Why Do We Need Quality Models?</h2>
+      <span class="slide-tag">Section 1 — Slide 4</span>
+    </div>
+    <div class="card-body">
+      <p class="section-intro">Without a quality model, "quality" is just subjective opinion. Quality models turn abstract ideas into concrete, measurable criteria. Six key purposes:</p>
+      <table class="fcm">
+        <tr><th>Purpose</th><th>Explanation</th></tr>
+        <tr><td class="bold">Shared Vocabulary</td><td>Gives all stakeholders (devs, testers, managers, clients) a common language so "maintainable" has a precise agreed meaning.</td></tr>
+        <tr><td class="bold">Measurability</td><td>Breaks abstract quality into quantifiable attributes and metrics. Deming's principle: <em>"You can only improve what you measure."</em></td></tr>
+        <tr><td class="bold">Prioritisation</td><td>Not all attributes matter equally in every context. A pacemaker needs Reliability &gt; Performance; a social media app needs Usability &gt; Portability.</td></tr>
+        <tr><td class="bold">Standards Compliance</td><td>Provides basis for ISO certification, regulatory audits, and contractual quality obligations.</td></tr>
+        <tr><td class="bold">Process Improvement</td><td>Identifies gaps between current quality and targets, guiding investment in test automation, CI/CD, and code reviews.</td></tr>
+        <tr><td class="bold">Risk Reduction</td><td>Ariane 5 (1996): software integer overflow → USD 370M loss. Northeast Blackout (2003): software alarm failure → USD 6B cost, 55M people affected.</td></tr>
+      </table>
+      <div class="insight">
+        <strong>💡 Exam Tip:</strong> Be ready to state at least 3 purposes of quality models and explain each. The real-world failure examples (Ariane 5, Northeast Blackout) may appear in scenario questions.
+      </div>
+    </div>
+  </div>
+
+  <!-- McCall's Model -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">🏛️</div>
+      <h2>McCall's Quality Model (1977)</h2>
+      <span class="slide-tag">Sections 2 — Slides 5–6</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">Origin &amp; Purpose</div>
+        <p>Proposed by Jim McCall, Paul Richards &amp; Gene Walters (1977), commissioned by the US Air Force Electronic Systems Division. One of the first systematic attempts to define software quality as measurable attributes.</p>
+        <div class="source">Reference: McCall et al. (1977). Factors in Software Quality, Vols 1–3. NTIS AD/A-049 014. US Air Force.</div>
+      </div>
+
+      <p class="section-intro"><strong>Structure:</strong> 3 Product Perspectives → 11 Quality Factors → Criteria → Metrics</p>
+      <div class="three-col" style="margin-bottom:1rem;">
+        <div class="persp-card op">
+          <h3>🖥️ Product Operation</h3>
+          <p><em>How well it runs</em> — does it perform correctly and safely for the end user?</p>
+          <div class="factors">
+            <span class="factor-tag">Correctness</span>
+            <span class="factor-tag">Reliability</span>
+            <span class="factor-tag">Efficiency</span>
+            <span class="factor-tag">Integrity</span>
+            <span class="factor-tag">Usability</span>
+          </div>
+        </div>
+        <div class="persp-card rev">
+          <h3>🔧 Product Revision</h3>
+          <p><em>How well it changes</em> — can developers easily correct, adapt, or test it?</p>
+          <div class="factors">
+            <span class="factor-tag">Maintainability</span>
+            <span class="factor-tag">Flexibility</span>
+            <span class="factor-tag">Testability</span>
+          </div>
+        </div>
+        <div class="persp-card trans">
+          <h3>🔄 Product Transition</h3>
+          <p><em>How well it adapts</em> — can it move to new environments or be reused?</p>
+          <div class="factors">
+            <span class="factor-tag">Portability</span>
+            <span class="factor-tag">Reusability</span>
+            <span class="factor-tag">Interoperability</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-intro" style="font-weight:700;">The 11 Quality Factors — Full Definitions:</p>
+      <table class="fcm">
+        <tr><th>Factor</th><th>Perspective</th><th>Definition</th><th>Example Criteria</th></tr>
+        <tr><td class="bold" style="color:var(--blue);">Correctness</td><td>Operation</td><td>Degree to which software meets its specifications and fulfils user objectives.</td><td>Traceability, Consistency, Completeness</td></tr>
+        <tr><td class="bold" style="color:var(--blue);">Reliability</td><td>Operation</td><td>Probability of failure-free operation over a specified time period in a specified environment.</td><td>Accuracy, Error Tolerance, Consistency</td></tr>
+        <tr><td class="bold" style="color:var(--blue);">Efficiency</td><td>Operation</td><td>Amount of computing resources and code required to perform a function.</td><td>Execution Efficiency, Storage Efficiency</td></tr>
+        <tr><td class="bold" style="color:var(--blue);">Integrity</td><td>Operation</td><td>Degree to which access to software and data can be controlled — preventing unauthorised use.</td><td>Access Control, Access Audit</td></tr>
+        <tr><td class="bold" style="color:var(--blue);">Usability</td><td>Operation</td><td>Effort required to learn, operate, prepare input, and interpret output.</td><td>Operability, Training, Communicativeness</td></tr>
+        <tr><td class="bold" style="color:var(--teal);">Maintainability</td><td>Revision</td><td>Effort required to locate and fix an error in an operational program.</td><td>Consistency, Simplicity, Conciseness, Self-documentation</td></tr>
+        <tr><td class="bold" style="color:var(--teal);">Flexibility</td><td>Revision</td><td>Effort required to modify an operational program.</td><td>Modularity, Generality, Expandability</td></tr>
+        <tr><td class="bold" style="color:var(--teal);">Testability</td><td>Revision</td><td>Effort required to test a program to ensure it performs its intended functions.</td><td>Simplicity, Instrumentation, Self-documentation</td></tr>
+        <tr><td class="bold" style="color:var(--purple);">Portability</td><td>Transition</td><td>Effort required to transfer the program from one hardware/OS environment to another.</td><td>Machine Independence, SW Independence</td></tr>
+        <tr><td class="bold" style="color:var(--purple);">Reusability</td><td>Transition</td><td>Extent to which software can be reused in another application.</td><td>Generality, Modularity, Self-documentation</td></tr>
+        <tr><td class="bold" style="color:var(--purple);">Interoperability</td><td>Transition</td><td>Effort required to couple one system to another.</td><td>Modularity, Communications Commonality, Data Commonality</td></tr>
+      </table>
+
+      <p class="section-intro" style="font-weight:700;margin-top:1rem;">The Factor–Criteria–Metric (FCM) Hierarchy — McCall's Core Contribution:</p>
+      <div class="fcm-visual">
+        <div class="fcm-box fcm-l1">
+          <div class="level">Level 1 — Factor</div>
+          <div class="content">High-level quality attribute visible to users &amp; managers. Qualitative — cannot be measured directly.<br><br><em>Example: Reliability</em></div>
+        </div>
+        <div class="fcm-arrow">→</div>
+        <div class="fcm-box fcm-l2">
+          <div class="level">Level 2 — Criteria</div>
+          <div class="content">Software properties that contribute to a factor. Engineer-level definitions.<br><br><em>Example: Accuracy, Error Tolerance, Consistency</em></div>
+        </div>
+        <div class="fcm-arrow">→</div>
+        <div class="fcm-box fcm-l3">
+          <div class="level">Level 3 — Metric</div>
+          <div class="content">Quantitative measure of a criterion. Actual numbers collected during dev/testing.<br><br><em>Example: MTBF, Defect Density, Failure Rate</em></div>
+        </div>
+      </div>
+
+      <div class="definition-box" style="margin-top:1rem;">
+        <div class="label">Worked Example — FCM for Reliability</div>
+        <p>A payment gateway tested over 1,000 hours experiences 4 failures. MTBF = 1000÷4 = 250 hours. Defect density = 2.5 defects per KLOC. These metrics operationalise the Reliability factor.</p>
+      </div>
+
+      <div class="warning">
+        <strong>⚠️ Exam Tip:</strong> Know all 11 factors and which perspective they belong to. Commonly tested: "Which factors are in Product Operation?" (Correctness, Reliability, Efficiency, Integrity, Usability). Also know that FCM = Factor → Criteria → Metric (3 levels, in order). Limitation: overlapping factors (e.g., Maintainability vs. Flexibility), and it's dated (1977) — doesn't cover security-by-design, cloud scalability, etc.
+      </div>
+    </div>
+  </div>
+
+  <!-- Boehm's Model -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#d1f5ec;">🌳</div>
+      <h2>Boehm's Quality Model (1978)</h2>
+      <span class="slide-tag">Section 3 — Slide 7</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">Origin &amp; Key Innovation</div>
+        <p>Published by Barry Boehm, John Brown &amp; colleagues (1978). Key shift from McCall: quality is modelled as a hierarchical weighted tree, not a flat factor list. Numeric weights enable quantitative quality scoring and trade-off analysis.</p>
+        <div class="source">Reference: Boehm et al. (1978). Characteristics of Software Quality. North-Holland Publishing Company.</div>
+      </div>
+
+      <p class="section-intro"><strong>Model Structure (top to bottom):</strong></p>
+      <table class="fcm">
+        <tr><th>Level</th><th>Node</th><th>Description</th></tr>
+        <tr><td class="bold">Root</td><td>General Utility</td><td>Top-level goal: Can the software be used as-is and will it continue to work well over time?</td></tr>
+        <tr><td class="bold">Primary Characteristics</td><td>Portability, Reliability, Efficiency, Human Engineering (Usability), Testability, Understandability, Modifiability</td><td>Major quality dimensions — each has a numeric weight assigned.</td></tr>
+        <tr><td class="bold">Intermediate Nodes</td><td>E.g., Reliability → Accuracy, Self-Consistency</td><td>Further decompose primary characteristics into sub-qualities.</td></tr>
+        <tr><td class="bold">Primitive Constructs</td><td>Structured design, self-descriptiveness, legibility, augmentability</td><td>Leaf nodes — directly measurable properties.</td></tr>
+      </table>
+
+      <p class="section-intro" style="font-weight:700;margin-top:1rem;">Key Feature: Weighted Nodes</p>
+      <div class="two-col">
+        <div class="info-block">
+          <h3 style="color:var(--teal);">What weights enable:</h3>
+          <ul>
+            <li>Calculate an overall quality score as a weighted sum across the tree</li>
+            <li>Perform trade-off analysis (e.g., improve maintainability at cost of efficiency)</li>
+            <li>Model the cost-quality relationship during development</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h3 style="color:var(--red);">Limitations:</h3>
+          <ul>
+            <li>Weight assignment is subjective — who decides each weight?</li>
+            <li>Complex to apply in real industrial projects</li>
+            <li>Designed in 1978 — doesn't address modern concerns (cloud, AI, APIs)</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="section-intro" style="font-weight:700;margin-top:1rem;">McCall vs. Boehm — Comparison:</p>
+      <table class="fcm">
+        <tr><th>Dimension</th><th>McCall (1977)</th><th>Boehm (1978)</th></tr>
+        <tr><td class="bold">Structure</td><td>Flat — 3 perspectives, 11 factors</td><td>Hierarchical weighted tree</td></tr>
+        <tr><td class="bold">Measurement</td><td>Factor → Criteria → Metric (3 levels)</td><td>Weighted nodes from root to primitives</td></tr>
+        <tr><td class="bold">Quantification</td><td>Metrics at the lowest level only</td><td>Numeric weights at EVERY node</td></tr>
+        <tr><td class="bold">Trade-off Analysis</td><td>Limited — factors are independent</td><td>Built-in — weights enable trade-offs</td></tr>
+        <tr><td class="bold">Primary Audience</td><td>DoD programme managers</td><td>Researchers and cost modellers</td></tr>
+        <tr><td class="bold">Limitation</td><td>Overlapping factors</td><td>Subjective weights; complex to apply</td></tr>
+      </table>
+
+      <div class="insight">
+        <strong>💡 Key Distinction:</strong> McCall = flat structure, practical for government contracts. Boehm = hierarchical tree with weights, better for research and cost-quality modelling. Both are dated and don't address modern security-by-design, cloud scalability, or AI quality concerns.
+      </div>
+    </div>
+  </div>
+
+  <!-- FURPS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#fef3dc;">⚡</div>
+      <h2>FURPS / FURPS+ Model (1987 / 1990s)</h2>
+      <span class="slide-tag">Section 4 — Slide 8</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">Origin</div>
+        <p>Developed by Robert Grady at Hewlett-Packard (1987). Designed as a practical, lightweight framework for defining and tracking quality requirements in industrial software projects. FURPS+ extended by Rational Software in the 1990s.</p>
+        <div class="source">Reference: Grady &amp; Caswell (1987). Software Metrics: Establishing a Company-Wide Program. Prentice-Hall.</div>
+      </div>
+
+      <div class="furps-grid">
+        <div class="furps-item f-f"><div class="letter">F</div><div class="name">Functionality</div></div>
+        <div class="furps-item f-u"><div class="letter">U</div><div class="name">Usability</div></div>
+        <div class="furps-item f-r"><div class="letter">R</div><div class="name">Reliability</div></div>
+        <div class="furps-item f-p"><div class="letter">P</div><div class="name">Performance</div></div>
+        <div class="furps-item f-s"><div class="letter">S</div><div class="name">Supportability</div></div>
+      </div>
+
+      <table class="fcm" style="margin-bottom:1.5rem;">
+        <tr><th>Category</th><th>Definition</th><th>Sub-attributes / Examples</th></tr>
+        <tr><td class="bold" style="color:var(--blue);">F — Functionality</td><td>What the system does — core feature set, capabilities, and security controls.</td><td>Feature set, Capabilities, Generality, Security (access control, encryption, authentication)</td></tr>
+        <tr><td class="bold" style="color:var(--teal);">U — Usability</td><td>How easily end-users can learn and operate the system.</td><td>Human factors, Aesthetics, UI Consistency, Documentation quality, Accessibility (WCAG)</td></tr>
+        <tr><td class="bold" style="color:var(--red);">R — Reliability</td><td>Probability of failure-free operation; ability to recover from failures.</td><td>Frequency/severity of failure, Recoverability, Predictability, Accuracy, MTTF, MTTR</td></tr>
+        <tr><td class="bold" style="color:var(--purple);">P — Performance</td><td>How fast and efficiently the system performs under various load conditions.</td><td>Response time, Throughput (TPS), Resource utilisation (CPU, RAM), Scalability</td></tr>
+        <tr><td class="bold" style="color:var(--orange);">S — Supportability</td><td>How easily the system can be tested, extended, configured, and maintained after deployment.</td><td>Testability, Extensibility, Adaptability, Maintainability, Configurability, Serviceability</td></tr>
+      </table>
+
+      <p class="section-intro" style="font-weight:700;">FURPS+ Extensions — 4 Constraint Categories:</p>
+      <div class="ext-grid" style="margin-bottom:1rem;">
+        <div class="ext-item" style="border-color:var(--blue);">
+          <div class="ename" style="color:var(--blue);">Design Constraints</div>
+          <p>Restrictions on HOW the system must be designed. E.g., must use microservice architecture; must conform to REST API conventions.</p>
+        </div>
+        <div class="ext-item" style="border-color:var(--teal);">
+          <div class="ename" style="color:var(--teal);">Implementation Constraints</div>
+          <p>Restrictions on coding standards, languages, or tools. E.g., must use Python 3.11; must follow OWASP Secure Coding Guidelines.</p>
+        </div>
+        <div class="ext-item" style="border-color:var(--purple);">
+          <div class="ename" style="color:var(--purple);">Interface Constraints</div>
+          <p>Restrictions on external system interactions. E.g., must integrate with SAP ERP via SOAP; must support OAuth 2.0.</p>
+        </div>
+        <div class="ext-item" style="border-color:var(--orange);">
+          <div class="ename" style="color:var(--orange);">Physical Constraints</div>
+          <p>Hardware requirements or limitations. E.g., must run on minimum 2 GB RAM; must not exceed 50 MB installation footprint.</p>
+        </div>
+      </div>
+
+      <div class="warning">
+        <strong>⚠️ Exam Tip:</strong> Know what each FURPS letter stands for and its definition. "Supportability" is the one people forget — it includes testability, extensibility, maintainability, and configurability. Also know the 4 FURPS+ constraint categories and give an example for each. Best suited for: Agile, industrial software projects (HP context).
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#ede8fb;">📊</div>
+      <h2>Comparing All Four Quality Models</h2>
+      <span class="slide-tag">Section 5 — Slides 9–10</span>
+    </div>
+    <div class="card-body">
+      <p class="section-intro">No single model is universally optimal. Choice depends on project context, regulatory environment, and SDLC phase.</p>
+      <div style="overflow-x:auto;">
+        <table class="compare">
+          <tr>
+            <th></th>
+            <th class="c1">McCall (1977)</th>
+            <th class="c2">Boehm (1978)</th>
+            <th class="c3">FURPS (1987)</th>
+            <th class="c4">ISO 25010 (2011)</th>
+          </tr>
+          <tr><td>Origin</td><td>US Air Force / DoD</td><td>Barry Boehm et al.</td><td>Hewlett-Packard</td><td>ISO / IEC Standard</td></tr>
+          <tr><td>Structure</td><td>3 perspectives, 11 factors</td><td>Weighted quality tree</td><td>5 categories + constraints</td><td>8 chars, 31 sub-chars</td></tr>
+          <tr><td>Approach</td><td>Factor–Criteria–Metric</td><td>Hierarchical with weights</td><td>Flat categorisation</td><td>Hierarchical, standardised</td></tr>
+          <tr><td>Measurability</td><td>Metrics at leaf level</td><td>Quantitative weights throughout</td><td>Qualitative &amp; quantitative</td><td>Detailed metrics guidance</td></tr>
+          <tr><td>Strength</td><td>Clear hierarchy; practical</td><td>Supports trade-off analysis</td><td>Lightweight; maps to user stories</td><td>Internationally recognised</td></tr>
+          <tr><td>Limitation</td><td>Overlapping factors; dated</td><td>Subjective weights; complex</td><td>Less detailed than ISO</td><td>Too broad for small projects</td></tr>
+          <tr><td>Best For</td><td>Military/defence contracts</td><td>Research, cost modelling</td><td>Agile, industrial SW</td><td>Commercial products, compliance</td></tr>
+        </table>
+      </div>
+      <div class="insight" style="margin-top:1rem;">
+        <strong>💡 Context → Model Mapping (also in Section 7):</strong><br>
+        US Defence contract → McCall | Research/cost study → Boehm | Agile industrial → FURPS | Commercial certification → ISO 25010 | Process improvement → CMMI | Large enterprise → ISO 25010 + CMMI together
+      </div>
+    </div>
+  </div>
+
+  <!-- Product vs Process Quality -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#fdecea;">⚖️</div>
+      <h2>Product Quality vs. Process Quality</h2>
+      <span class="slide-tag">Section 6 — Slides 11–13</span>
+    </div>
+    <div class="card-body">
+      <div class="pp-grid" style="margin-bottom:1rem;">
+        <div class="pp-card prod-card">
+          <h3>📦 Product Quality</h3>
+          <ul>
+            <li>Focuses on the delivered software artefact</li>
+            <li>Assessed via metrics, reviews, and testing</li>
+            <li>What the customer directly experiences</li>
+            <li>Defined by ISO 25010 characteristics</li>
+            <li>Metrics: defect density, MTTF, usability scores</li>
+            <li>Measured at delivery and during operation</li>
+          </ul>
+        </div>
+        <div class="pp-card proc-card">
+          <h3>⚙️ Process Quality</h3>
+          <ul>
+            <li>Focuses on HOW the software is developed</li>
+            <li>Assessed via process audits and maturity models</li>
+            <li>Affects product quality indirectly</li>
+            <li>Defined by CMMI, ISO 9001, ISO/IEC 15504 (SPICE)</li>
+            <li>Metrics: review rates, rework effort, test coverage</li>
+            <li>Measured throughout the entire SDLC</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="section-intro" style="font-weight:700;">Three Critical Principles (must memorise):</p>
+      <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1rem;">
+        <div class="insight">
+          <strong>Principle 1 — Process influences product:</strong> Good processes reduce defect insertion rate, improve traceability, and enable faster correction. High process maturity makes high product quality more likely.
+        </div>
+        <div class="warning">
+          <strong>Principle 2 — Process does NOT guarantee product:</strong> You can have an ISO 9001-certified process and still produce a product that fails user needs — if requirements were wrong or architecture was flawed. NASA Mars Climate Orbiter (1999): CMMI Level 5 process → still lost due to a metric units mismatch between two teams. This illustrates Principle 2.
+        </div>
+        <div class="danger-box">
+          <strong>Principle 3 — Low process quality ALMOST ALWAYS causes low product quality:</strong> Ad-hoc, chaotic processes (CMMI Level 1) consistently produce defect-ridden, unreliable software. This is the strongest causal direction.
+        </div>
+      </div>
+
+      <p class="section-intro" style="font-weight:700;">CMMI — Capability Maturity Model Integration (5 Levels):</p>
+      <div class="cmmi-stack">
+        <div class="cmmi-level lv5">
+          <div class="lvl-num">5</div>
+          <div><div class="lvl-name">Optimising</div><div class="lvl-desc">Continuous process improvement through quantitative feedback; defect prevention; technology innovation systematically adopted.</div></div>
+        </div>
+        <div class="cmmi-level lv4">
+          <div class="lvl-num">4</div>
+          <div><div class="lvl-name">Quantitatively Managed</div><div class="lvl-desc">Processes measured and controlled using statistical techniques; predictable performance within defined limits.</div></div>
+        </div>
+        <div class="cmmi-level lv3">
+          <div class="lvl-num">3</div>
+          <div><div class="lvl-name">Defined</div><div class="lvl-desc">Processes documented, standardised, and integrated enterprise-wide; an organisational standard process exists.</div></div>
+        </div>
+        <div class="cmmi-level lv2">
+          <div class="lvl-num">2</div>
+          <div><div class="lvl-name">Managed</div><div class="lvl-desc">Basic project management in place; processes are planned, performed, monitored, and controlled on a per-project basis.</div></div>
+        </div>
+        <div class="cmmi-level lv1">
+          <div class="lvl-num">1</div>
+          <div><div class="lvl-name">Initial</div><div class="lvl-desc">Ad-hoc and chaotic. No stable process environment. Success depends on individual heroics. Processes cannot be repeated reliably.</div></div>
+        </div>
+      </div>
+
+      <div class="warning" style="margin-top:1rem;">
+        <strong>⚠️ Key Facts for Exam:</strong> As of 2024, fewer than 10% of organisations worldwide achieve CMMI Level 4 or 5. Most commercial organisations operate at Level 2–3. CMMI Level 3+ is mandatory for many defence, aerospace, and medical device software contracts.
+      </div>
+    </div>
+  </div>
+
+  <!-- Choosing the Right Model -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#e8f5e9;">🎯</div>
+      <h2>Choosing the Right Model</h2>
+      <span class="slide-tag">Section 7 — Slide 14</span>
+    </div>
+    <div class="card-body">
+      <table class="context">
+        <tr><th>Project Context</th><th>Recommended Model</th><th>Rationale</th></tr>
+        <tr><td>US Defence / Government Contract</td><td class="rec">McCall's Model</td><td>Mandated for DoD projects; FCM hierarchy maps directly to contract requirements.</td></tr>
+        <tr><td>Research / Academic Cost Study</td><td class="rec">Boehm's Model</td><td>Weighted tree enables quantitative trade-off analysis and cost-quality modelling.</td></tr>
+        <tr><td>Industrial SW Product (Agile/HP context)</td><td class="rec">FURPS / FURPS+</td><td>Practical, lightweight; maps well to user stories and acceptance criteria.</td></tr>
+        <tr><td>Commercial Product Certification</td><td class="rec">ISO 25010</td><td>Internationally recognised; required for CE marking, FDA 510(k), and compliance.</td></tr>
+        <tr><td>Process Improvement Initiative</td><td class="rec">CMMI + Process Quality</td><td>Focus on process maturity levels — improving HOW software is built.</td></tr>
+        <tr><td>Large Enterprise / All Contexts</td><td class="rec">ISO 25010 + CMMI</td><td>Comprehensive: product quality (ISO) + process quality (CMMI) working together.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== CLASS ACTIVITIES ===== -->
+<div class="tab-panel container" id="tab-activities">
+
+  <p style="font-size:14px;color:var(--muted);margin-bottom:1.5rem;">All activities are from the lecture notes. Try each question yourself before reading the model answer.</p>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 1 — Recap</span><h3>Quick Poll: Quality Attribute Identification</h3></div>
+    <p style="font-size:13px;opacity:.8;margin-bottom:1rem;">Identify the quality attribute violated in each scenario and state whether it is functional or non-functional.</p>
+    <div class="q">
+      <div class="q-text">Scenario A: A hospital record system crashes when more than 50 users are logged in simultaneously, causing data loss and unavailability.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Attribute violated:</strong> Reliability (non-functional) — specifically the sub-characteristics of Fault Tolerance (system did not continue operating under load) and Availability (system became unavailable). Also potentially Performance Efficiency if the crash was caused by resource overload rather than a pure reliability defect.<br><br>
+        <strong>Type:</strong> Non-functional — it describes HOW WELL the system operates, not WHAT it does.</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">Scenario B: An e-commerce website takes 12 seconds to process a payment, causing users to abandon checkout.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Attribute violated:</strong> Performance Efficiency (non-functional) — specifically Time Behaviour (response time is unacceptably slow). In FURPS terms, this falls under 'P — Performance'. In McCall terms, this is the Efficiency factor (Product Operation perspective).<br><br>
+        <strong>Type:</strong> Non-functional — describes how fast/efficiently the system processes the payment, not whether the payment feature exists.</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">Scenario C: A mobile banking app has a confusing interface where the "Transfer" and "Pay Bill" buttons look identical, causing frequent user errors.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Attribute violated:</strong> Usability (non-functional) — specifically Operability and User Error Protection (ISO 25010 sub-characteristics). In FURPS: 'U — Usability'. In McCall: Usability factor (Product Operation perspective).<br><br>
+        <strong>Type:</strong> Non-functional — the transfer/pay-bill features may exist and work correctly (functional), but the interface makes them hard to distinguish (non-functional quality failure).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 2</span><h3>FCM Mapping Exercise — Student Portal</h3></div>
+    <p style="font-size:13px;opacity:.8;margin-bottom:1rem;">For a Student Portal system (login, view grades, submit assignments, view timetable), apply McCall's FCM hierarchy.</p>
+    <div class="q">
+      <div class="q-text">Step 1: Identify the 3 most critical McCall factors for a Student Portal. Step 2: Propose 2 criteria per factor. Step 3: Suggest a measurable metric for each criterion.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Factor 1: Reliability (Operation)</strong><br>
+        Criteria: Accuracy (grades displayed must be correct), Error Tolerance (system should not crash if server is slow)<br>
+        Metrics: Defect density in grade calculation module (defects/KLOC); MTBF of the portal server (hours between failures)<br><br>
+
+        <strong>Factor 2: Usability (Operation)</strong><br>
+        Criteria: Operability (students can submit assignments without needing a manual), Communicativeness (error messages are clear and helpful)<br>
+        Metrics: Average task completion time for assignment submission (seconds); number of support tickets per 100 users per month<br><br>
+
+        <strong>Factor 3: Maintainability (Revision)</strong><br>
+        Criteria: Simplicity (codebase is easy to understand and modify), Self-documentation (code is commented and documented)<br>
+        Metrics: Average time to fix a reported bug (hours); Lines of documentation per 100 lines of code ratio</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 3</span><h3>FURPS Requirement Classification — Ride-Sharing App</h3></div>
+    <p style="font-size:13px;opacity:.8;margin-bottom:1rem;">Classify each requirement into the correct FURPS or FURPS+ category.</p>
+    <div class="q">
+      <div class="q-text">Classify the following 8 requirements:<br>
+      1. The app shall respond to a booking request in under 1.5 seconds.<br>
+      2. The system shall encrypt all payment data using AES-256.<br>
+      3. The driver onboarding flow shall be completable in under 10 minutes.<br>
+      4. The system shall maintain 99.9% uptime with automatic failover.<br>
+      5. The app shall be developed using React Native for cross-platform support.<br>
+      6. The app must integrate with Google Maps API for routing.<br>
+      7. The system shall support feature flags for A/B testing new UI elements.<br>
+      8. The app must run on Android devices with minimum 2 GB RAM.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p>
+        1. "Under 1.5 seconds" → <strong>P — Performance</strong> (response time / time behaviour)<br>
+        2. "Encrypt all payment data using AES-256" → <strong>F — Functionality</strong> (security/access control sub-attribute of Functionality in FURPS)<br>
+        3. "Driver onboarding completable in 10 min" → <strong>U — Usability</strong> (learnability, ease of use)<br>
+        4. "99.9% uptime with auto-failover" → <strong>R — Reliability</strong> (availability, fault tolerance)<br>
+        5. "Developed using React Native" → <strong>FURPS+ Implementation Constraint</strong> (specifies programming tool/language)<br>
+        6. "Integrate with Google Maps API" → <strong>FURPS+ Interface Constraint</strong> (external system integration)<br>
+        7. "Feature flags for A/B testing" → <strong>S — Supportability</strong> (configurability, extensibility)<br>
+        8. "Run on 2 GB RAM minimum" → <strong>FURPS+ Physical Constraint</strong> (hardware requirement)
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 4</span><h3>CMMI Level Classification</h3></div>
+    <p style="font-size:13px;opacity:.8;margin-bottom:1rem;">Classify each organisation vignette at the correct CMMI level (1–5).</p>
+    <div class="q">
+      <div class="q-text">
+      Org A: "Each developer decides their own testing approach; no documentation standards exist. Projects succeed or fail based on individual effort."<br>
+      Org B: "Each project has a documented test plan and schedule. The team tracks defects and holds weekly reviews, but processes differ across projects."<br>
+      Org C: "All projects follow the same company-wide Software Development Process defined in our process library. All developers are trained on it."<br>
+      Org D: "We collect defect density, test coverage, and cycle time data from all projects. We use statistical process control dashboards reviewed weekly."<br>
+      Org E: "We use Six Sigma and process mining to identify bottlenecks in our SDLC and run controlled experiments to improve our development process quarterly."
+      </div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p>
+        <strong>Org A → CMMI Level 1 (Initial)</strong> — Ad-hoc and chaotic. No stable process environment. Success depends on individual heroics.<br><br>
+        <strong>Org B → CMMI Level 2 (Managed)</strong> — Basic project management in place; processes are planned, monitored, and controlled on a per-project basis, but not yet standardised across the organisation.<br><br>
+        <strong>Org C → CMMI Level 3 (Defined)</strong> — Processes are documented, standardised, and integrated enterprise-wide. An organisational standard process exists and all staff are trained.<br><br>
+        <strong>Org D → CMMI Level 4 (Quantitatively Managed)</strong> — Processes measured and controlled using statistical techniques. Predictable performance within defined limits.<br><br>
+        <strong>Org E → CMMI Level 5 (Optimising)</strong> — Continuous process improvement through quantitative feedback; uses data-driven experiments to improve the development process systematically.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 5 — Debate</span><h3>McCall (Practical) vs. Boehm (Rigorous)</h3></div>
+    <div class="q">
+      <div class="q-text">Group A argues McCall's FCM approach is more practical for industrial use. Group B argues Boehm's weighted tree is more rigorous. Write the argument for BOTH sides.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Group A — McCall is more practical:</strong><br>
+        McCall's 3-perspective, 11-factor, FCM structure is easy to explain to managers and clients. It maps directly to contractual deliverables (especially in DoD projects). The three-level hierarchy (Factor → Criteria → Metric) provides a clear workflow for quality engineers. Any team can apply it without needing advanced statistical knowledge. It has been validated in real government software programmes since 1977.<br><br>
+
+        <strong>Group B — Boehm is more rigorous:</strong><br>
+        Boehm's weighted tree allows numeric quality scoring across every node, enabling organisations to calculate an overall quality score and compare alternatives. It explicitly supports trade-off analysis — you can quantify what you sacrifice in efficiency to gain maintainability. The hierarchical decomposition down to primitive (directly measurable) constructs is more theoretically sound. In research and cost-modelling contexts, the quantitative rigour of Boehm's model is essential for defensible results.<br><br>
+
+        <strong>Instructor summary:</strong> In practice, McCall is used more in government/defence contracts (mandated); Boehm is cited more in research papers. ISO 25010 has largely replaced both in modern commercial settings.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header"><span class="act-badge">Activity 6 — Discussion</span><h3>Best Model for Mobile App Development</h3></div>
+    <div class="q">
+      <div class="q-text">Which quality model best suits mobile application development — considering rapid release cycles, diverse device constraints, app store compliance, and end-user experience expectations?</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer (Full Marks Response)</div>
+        <p><strong>Recommended: FURPS+ as primary, ISO 25010 for compliance checks.</strong><br><br>
+
+        <strong>FURPS+ is most suitable because:</strong><br>
+        — Rapid release cycles align with FURPS's lightweight, user-story-friendly structure. Each sprint can be reviewed against F, U, R, P, S categories quickly.<br>
+        — Diverse device constraints (RAM, screen sizes, OS versions) map directly to FURPS+ Physical and Implementation Constraints.<br>
+        — End-user experience is directly addressed by U (Usability) and P (Performance) categories — both critical for app store ratings.<br>
+        — App store requirements (e.g., WCAG accessibility for Apple App Store) fit the U — Usability category with WCAG sub-attribute.<br><br>
+
+        <strong>ISO 25010 is also useful for:</strong><br>
+        — Security compliance (GDPR, data protection) — maps to the Security characteristic.<br>
+        — Apps targeting regulated sectors (health, finance) requiring formal compliance certification.<br><br>
+
+        <strong>McCall and Boehm are less suitable:</strong> McCall is designed for defence contracts and is overly formal for a startup or agile mobile team. Boehm's weighted tree is complex and best for research, not sprint-based delivery.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== SAMPLE EXAM QUESTIONS ===== -->
+<div class="tab-panel container" id="tab-questions">
+
+  <p style="font-size:14px;color:var(--muted);margin-bottom:1.5rem;">Click any question to reveal the model answer. CLO-1 (C-1: Remember) is the primary level — recall of models, definitions, and structures.</p>
+
+  <div class="q-section">
+    <h2>📝 Section A — Short Answer / Recall (CLO-1)</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">1</span>
+        <span class="q-text">Who proposed McCall's Quality Model, when, and for whom was it commissioned?</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">2 Marks</span><span class="clo-tag">CLO-1</span>
+        <p>McCall's Quality Model was proposed by <strong>Jim McCall, Paul Richards, and Gene Walters in 1977</strong>, commissioned by the <strong>United States Air Force Electronic Systems Division</strong>. It was one of the first systematic attempts to define software quality as a set of measurable attributes.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">2</span>
+        <span class="q-text">List the three product perspectives of McCall's model and name all 11 quality factors, grouped by perspective.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Product Operation</strong> (how well it runs): Correctness, Reliability, Efficiency, Integrity, Usability<br><br>
+        <strong>Product Revision</strong> (how well it changes): Maintainability, Flexibility, Testability<br><br>
+        <strong>Product Transition</strong> (how well it adapts): Portability, Reusability, Interoperability</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">3</span>
+        <span class="q-text">Explain the Factor–Criteria–Metric (FCM) hierarchy in McCall's model with one example.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">4 Marks</span><span class="clo-tag">CLO-1</span>
+        <p>The FCM hierarchy has three levels:<br><br>
+        <strong>Factor (Level 1):</strong> A high-level qualitative quality attribute visible to users and managers. Cannot be measured directly. Example: Reliability.<br><br>
+        <strong>Criteria (Level 2):</strong> Software properties that contribute to the factor, providing engineer-level definitions. Example: Accuracy, Error Tolerance, Consistency.<br><br>
+        <strong>Metric (Level 3):</strong> A quantitative measure of a criterion — the actual numbers collected during development or testing. Example: MTBF (Mean Time Between Failures), Defect Density (defects/KLOC), Failure Rate.<br><br>
+        Worked example: A payment gateway tested over 1,000 hours has 4 failures → MTBF = 250 hours; Defect Density = 2.5/KLOC. These metrics operationalise the Reliability factor.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">4</span>
+        <span class="q-text">What is the key structural difference between McCall's model and Boehm's model?</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">3 Marks</span><span class="clo-tag">CLO-1</span>
+        <p>McCall's model has a <strong>flat structure</strong> — 3 perspectives and 11 independent quality factors, measured via a three-level Factor–Criteria–Metric hierarchy. It assigns metrics only at the lowest level.<br><br>
+        Boehm's model has a <strong>hierarchical weighted tree</strong> structure, where quality decomposes from a root node (General Utility) through primary characteristics down to primitive constructs. Crucially, Boehm assigns <strong>numeric weights at every node</strong> in the tree, enabling quantitative quality scoring, overall quality calculation, and trade-off analysis between characteristics. This is Boehm's primary contribution over McCall.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">5</span>
+        <span class="q-text">What does FURPS stand for? Define each category in one sentence.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">5 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>F — Functionality:</strong> The core feature set and capabilities of the system, including security controls.<br>
+        <strong>U — Usability:</strong> How easily end-users can learn and operate the system.<br>
+        <strong>R — Reliability:</strong> The probability of failure-free operation over time and the system's ability to recover from failures.<br>
+        <strong>P — Performance:</strong> How fast and efficiently the system performs its functions under various load conditions.<br>
+        <strong>S — Supportability:</strong> How easily the system can be tested, extended, configured, and maintained after deployment.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">6</span>
+        <span class="q-text">List and briefly describe the four extension categories added by FURPS+.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">4 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Design Constraints:</strong> Restrictions on how the system must be designed (e.g., must use microservice architecture).<br>
+        <strong>Implementation Constraints:</strong> Restrictions on coding standards, languages, or tools (e.g., must use Python 3.11; must follow OWASP guidelines).<br>
+        <strong>Interface Constraints:</strong> Restrictions on external systems the software must interact with (e.g., must support OAuth 2.0; must integrate with SAP via SOAP).<br>
+        <strong>Physical Constraints:</strong> Hardware requirements or limitations (e.g., must run on minimum 2 GB RAM; must not exceed 50 MB installation size).</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">7</span>
+        <span class="q-text">List the 5 CMMI levels in order from lowest to highest and give a one-line description of each.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">5 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Level 1 — Initial:</strong> Ad-hoc and chaotic; success depends on individual heroics; processes cannot be repeated reliably.<br>
+        <strong>Level 2 — Managed:</strong> Basic project management in place; processes planned, monitored, and controlled per project.<br>
+        <strong>Level 3 — Defined:</strong> Processes documented, standardised, and integrated enterprise-wide; organisational standard process exists.<br>
+        <strong>Level 4 — Quantitatively Managed:</strong> Processes measured and controlled using statistical techniques; predictable performance within defined limits.<br>
+        <strong>Level 5 — Optimising:</strong> Continuous process improvement through quantitative feedback; defect prevention; systematic technology innovation.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">8</span>
+        <span class="q-text">State three purposes of quality models in software quality assurance.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">3 Marks</span><span class="clo-tag">CLO-1</span>
+        <p>1. <strong>Shared Vocabulary:</strong> Gives all stakeholders a common language so abstract terms like "maintainable" have precise, agreed-upon meaning across teams.<br><br>
+        2. <strong>Measurability:</strong> Breaks abstract quality into quantifiable attributes and metrics, enabling objective assessment (Deming: "You can only improve what you measure").<br><br>
+        3. <strong>Risk Reduction:</strong> Early identification of quality risks prevents catastrophic failures after deployment (e.g., Ariane 5 explosion 1996 — USD 370M loss from a software integer overflow).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-section">
+    <h2>🔬 Section B — Application / Comparison Questions</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num apply">9</span>
+        <span class="q-text">Differentiate between Product Quality and Process Quality. Explain the three principles that describe their relationship, using an example for each.</span>
+        <span class="q-type type-apply">Apply</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Product Quality</strong> focuses on the delivered software artefact — what the customer directly experiences. It is assessed via metrics, testing, and reviews. Governed by ISO 25010. Measured at delivery and during operation.<br><br>
+        <strong>Process Quality</strong> focuses on how the software is developed — the development process itself. Assessed via process audits and maturity models (CMMI, ISO 9001). Affects product quality indirectly. Measured throughout the SDLC.<br><br>
+
+        <strong>Principle 1 — Process influences product:</strong> Good processes reduce defect insertion and enable faster correction. Example: A team following rigorous code review and CI/CD processes will have fewer bugs reaching production, improving product reliability.<br><br>
+
+        <strong>Principle 2 — Process does NOT guarantee product:</strong> A perfect process can still produce a defective product if requirements are wrong. Example: NASA's Mars Climate Orbiter (1999) was built under CMMI Level 5 processes but was lost due to a metric units mismatch — a requirements/integration error, not a process failure.<br><br>
+
+        <strong>Principle 3 — Low process quality ALMOST ALWAYS causes low product quality:</strong> Chaotic, ad-hoc processes (CMMI Level 1) consistently produce defect-ridden software. Example: A startup with no code reviews, no documentation, and no test plans will almost certainly ship a buggy, unmaintainable product.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num apply">10</span>
+        <span class="q-text">Compare McCall's model and FURPS in terms of: structure, measurability, and best use context. Which would you recommend for an Agile mobile app team and why?</span>
+        <span class="q-type type-apply">Apply</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Structure:</strong> McCall uses 3 perspectives containing 11 quality factors with a 3-level FCM hierarchy. FURPS uses a flat structure with 5 categories and 4 optional constraint types (+).<br><br>
+        <strong>Measurability:</strong> McCall reaches quantitative metrics at the leaf level (Metric level of FCM). FURPS combines qualitative and quantitative approaches — less prescriptive about metrics but more flexible.<br><br>
+        <strong>Best use context:</strong> McCall → US government/defence contracts (mandated). FURPS → Agile industrial software, HP-style product development.<br><br>
+        <strong>Recommendation for Agile mobile app team: FURPS+</strong> — because its flat, category-based structure maps naturally onto user stories and acceptance criteria. Each sprint backlog item can be tagged as F/U/R/P/S. The FURPS+ constraints handle device and platform requirements (Physical/Implementation constraints), which are especially common in mobile development. McCall is too formal, too defence-oriented, and its FCM hierarchy is not designed for iterative delivery cycles.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-section">
+    <h2>🎭 Section C — Scenario-Based Questions</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num scenario">11</span>
+        <span class="q-text">SCENARIO: A healthcare startup is building a patient monitoring mobile app. The client says: "The app must alert nurses within 3 seconds of an abnormal heart rate. It must work on Samsung Galaxy A-series phones. It must be developed in Flutter. It must recover automatically if the server drops." Apply FURPS+ to classify each requirement. Then state which McCall factors are most critical for this system and why.</span>
+        <span class="q-type type-scenario">Scenario</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">10 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>FURPS+ Classification:</strong><br>
+        — "Alert nurses within 3 seconds" → <strong>P — Performance</strong> (time behaviour / response time)<br>
+        — "Work on Samsung Galaxy A-series phones" → <strong>FURPS+ Physical Constraint</strong> (specific hardware device requirement)<br>
+        — "Developed in Flutter" → <strong>FURPS+ Implementation Constraint</strong> (technology/language specification)<br>
+        — "Recover automatically if server drops" → <strong>R — Reliability</strong> (recoverability, fault tolerance sub-attributes)<br><br>
+
+        <strong>Most critical McCall factors for this healthcare system:</strong><br><br>
+
+        <strong>1. Reliability (Operation):</strong> Most critical — patient monitoring is a safety-critical system. Any failure to detect or report abnormal heart rate could be life-threatening. Metrics: MTBF, failure rate under normal operating conditions.<br><br>
+
+        <strong>2. Correctness (Operation):</strong> The system must accurately detect and classify heart rate anomalies — incorrect alerts (false negatives or false positives) are clinically dangerous. Metrics: Defect density in alert logic module.<br><br>
+
+        <strong>3. Integrity (Operation):</strong> Patient health data is highly sensitive. Unauthorised access to heart rate data violates HIPAA/privacy laws. Access Control and Access Audit criteria are critical. Metrics: Number of unauthorized access attempts detected and blocked.<br><br>
+
+        These three Operation perspective factors are prioritised because patient safety and data protection are more critical than, say, Portability or Reusability for this system.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num scenario">12</span>
+        <span class="q-text">SCENARIO: A software company wants to improve its quality. Currently, each project manager decides their own processes — there are no company-wide standards, and documentation is optional. Two consultants give advice: Consultant A recommends "implement ISO 25010 for all projects." Consultant B recommends "first achieve CMMI Level 3, then worry about ISO 25010." Who is correct, and why? Use the Product vs. Process Quality framework.</span>
+        <span class="q-type type-scenario">Scenario</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">8 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Consultant B is more correct for this company's situation.</strong><br><br>
+
+        <strong>Current state analysis:</strong> The company is at <strong>CMMI Level 1 (Initial)</strong> — each project manager decides their own processes, no company-wide standards, documentation is optional, success depends on individual heroics.<br><br>
+
+        <strong>Why Consultant B is right — Principle 3:</strong> Low process quality almost always causes low product quality. With CMMI Level 1 processes, even if engineers know the ISO 25010 characteristics, they have no consistent method to measure, control, or improve them. ISO 25010 defines WHAT to measure; CMMI defines HOW to build a reliable process to actually achieve those measurements.<br><br>
+
+        <strong>Why Consultant A is incomplete:</strong> ISO 25010 is a product quality standard — it tells you what characteristics good software should have. But if the development process is chaotic and inconsistent (Level 1), you cannot reliably produce software that meets those characteristics. Measuring defect density means nothing if there is no standard process for reviewing or fixing defects.<br><br>
+
+        <strong>Recommended approach:</strong> First implement CMMI Level 2 (basic project management — tracking, monitoring, basic standards), then Level 3 (organisation-wide defined process), and simultaneously begin introducing ISO 25010 quality criteria as measurement targets within those processes. The lecture's "best for large enterprise" recommendation confirms: <strong>ISO 25010 + CMMI together</strong> is the comprehensive solution — but the CMMI foundation must come first for a Level 1 organisation.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num scenario">13</span>
+        <span class="q-text">SCENARIO: "The 2003 Northeast Blackout affected 55 million people and cost approximately USD 6 billion. The root cause was a software alarm failure in a power management system." Use this real-world case to explain: (a) which McCall factor was violated, (b) which CMMI principle this illustrates, and (c) which quality model would have been most appropriate to prevent this failure.</span>
+        <span class="q-type type-scenario">Scenario</span>
+        <span class="q-toggle">▼ Show</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">6 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>(a) McCall Factor violated:</strong><br>
+        Primary: <strong>Reliability (Operation perspective)</strong> — the alarm system failed to operate correctly over time under critical conditions. Criteria: Error Tolerance (the system did not tolerate or handle the alarm failure gracefully) and Accuracy (the system did not produce correct outputs when needed).<br>
+        Secondary: <strong>Maintainability (Revision perspective)</strong> — the lecture notes specifically say "a reliability and maintainability defect that a systematic quality model might have surfaced earlier," suggesting the system's alarms were difficult to analyse and diagnose.<br><br>
+
+        <strong>(b) CMMI principle illustrated:</strong><br>
+        <strong>Principle 1 — Process influences product quality.</strong> If the power management system had been developed under higher process maturity (CMMI Level 3+), there would have been standardised alarm testing procedures, documented failure mode analysis, and structured code reviews. These process controls would likely have detected the alarm software defect before deployment, reducing the probability of this catastrophic failure.<br><br>
+
+        <strong>(c) Most appropriate quality model to prevent this:</strong><br>
+        <strong>ISO 25010 combined with CMMI.</strong> ISO 25010 would have required explicit measurement of Reliability (sub-characteristics: fault tolerance, availability, recoverability) and Maintainability (analysability) for the alarm software. CMMI Level 3+ would have ensured a standardised, rigorous testing and review process was applied. This combination — product quality standards + process maturity — gives the highest probability of preventing such safety-critical defects.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KEY TERMS ===== -->
+<div class="tab-panel container" id="tab-terms">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">📚</div>
+      <h2>Key Terms, Definitions &amp; Quick Reference</h2>
+    </div>
+    <div class="card-body">
+      <div class="terms-grid">
+        <div class="term-item"><div class="term">Quality Model</div><div class="def">A structured framework that turns abstract notions of software quality into concrete, measurable, and reproducible criteria for evaluation.</div></div>
+        <div class="term-item"><div class="term">McCall's Model (1977)</div><div class="def">3 perspectives (Operation, Revision, Transition), 11 quality factors, measured via the Factor–Criteria–Metric (FCM) hierarchy. Commissioned by US Air Force.</div></div>
+        <div class="term-item"><div class="term">FCM Hierarchy</div><div class="def">Factor (qualitative, user-visible) → Criteria (engineer-level properties) → Metric (quantitative measurements). McCall's key contribution.</div></div>
+        <div class="term-item"><div class="term">Product Operation</div><div class="def">McCall's first perspective: Correctness, Reliability, Efficiency, Integrity, Usability — how well the software runs for end users.</div></div>
+        <div class="term-item"><div class="term">Product Revision</div><div class="def">McCall's second perspective: Maintainability, Flexibility, Testability — how easily developers can change and test the software.</div></div>
+        <div class="term-item"><div class="term">Product Transition</div><div class="def">McCall's third perspective: Portability, Reusability, Interoperability — how well the software adapts to new environments or integrates with other systems.</div></div>
+        <div class="term-item"><div class="term">Boehm's Model (1978)</div><div class="def">Hierarchical weighted quality tree from root (General Utility) to primitive constructs. Enables quantitative quality scoring and trade-off analysis. By Barry Boehm et al.</div></div>
+        <div class="term-item"><div class="term">General Utility</div><div class="def">The root node of Boehm's quality tree — "Can the software be used as-is and will it continue to work well over time?"</div></div>
+        <div class="term-item"><div class="term">Primitive Constructs</div><div class="def">Leaf nodes in Boehm's model that are directly measurable: structured design, self-descriptiveness, legibility, augmentability.</div></div>
+        <div class="term-item"><div class="term">FURPS</div><div class="def">Functionality, Usability, Reliability, Performance, Supportability — HP's practical quality model by Robert Grady (1987).</div></div>
+        <div class="term-item"><div class="term">FURPS+</div><div class="def">FURPS extended with 4 constraint categories: Design, Implementation, Interface, and Physical constraints. Extended by Rational Software (1990s).</div></div>
+        <div class="term-item"><div class="term">Supportability</div><div class="def">The 'S' in FURPS: Testability, Extensibility, Adaptability, Maintainability, Configurability, Serviceability. Often confused with Maintainability.</div></div>
+        <div class="term-item"><div class="term">Product Quality</div><div class="def">Quality of the delivered software artefact — what the customer experiences. Defined by ISO 25010. Measured via metrics and testing.</div></div>
+        <div class="term-item"><div class="term">Process Quality</div><div class="def">Quality of how the software is developed — the development process itself. Defined by CMMI, ISO 9001. Affects product quality indirectly.</div></div>
+        <div class="term-item"><div class="term">CMMI</div><div class="def">Capability Maturity Model Integration — 5-level framework for measuring and improving software process quality. Level 1 (Initial) to Level 5 (Optimising).</div></div>
+        <div class="term-item"><div class="term">MTBF</div><div class="def">Mean Time Between Failures — reliability metric: total operating time ÷ number of failures. Used in McCall FCM metrics and FURPS Reliability.</div></div>
+        <div class="term-item"><div class="term">KLOC</div><div class="def">Kilo Lines of Code (1000 lines). Used in defect density metric: defects per KLOC. A McCall FCM Level 3 metric for Reliability.</div></div>
+        <div class="term-item"><div class="term">Trade-off Analysis</div><div class="def">Evaluating how improving one quality attribute affects another (e.g., improving security may reduce performance). Boehm's model explicitly supports this via weighted nodes.</div></div>
+      </div>
+
+      <div class="warning" style="margin-top:1.5rem;">
+        <strong>⚠️ Most Likely Exam Topics — Lecture 2:</strong><br>
+        1. McCall's 3 perspectives and all 11 factors (grouped correctly)<br>
+        2. FCM hierarchy — what each level means + a worked example<br>
+        3. Boehm vs. McCall — structural differences (flat vs. weighted tree)<br>
+        4. FURPS — all 5 letters and definitions + 4 FURPS+ constraint categories<br>
+        5. CMMI — all 5 levels in order with descriptions<br>
+        6. Product Quality vs. Process Quality — 3 principles + NASA Mars Climate Orbiter example<br>
+        7. Which model to use in which context (the 6-row context table)
+      </div>
+
+      <div class="insight" style="margin-top:1rem;">
+        <strong>💡 Mnemonic for McCall's 11 Factors:</strong><br>
+        Operation (5): <em>"Can Really Efficient Integrity Usefully..."</em> → <strong>C</strong>orrectness, <strong>R</strong>eliability, <strong>E</strong>fficiency, <strong>I</strong>ntegrity, <strong>U</strong>sability<br>
+        Revision (3): <em>"...Make Flexible Tests"</em> → <strong>M</strong>aintainability, <strong>F</strong>lexibility, <strong>T</strong>estability<br>
+        Transition (3): <em>"...Port Reuse Interop"</em> → <strong>P</strong>ortability, <strong>R</strong>eusability, <strong>I</strong>nteroperability
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(id){
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+id).classList.add('active');
+    const idx=['notes','activities','questions','terms'].indexOf(id);
+    document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  }
+  function toggleAnswer(header){
+    const ans=header.nextElementSibling;
+    const tog=header.querySelector('.q-toggle');
+    if(ans.classList.contains('open')){ans.classList.remove('open');tog.textContent='▼ Show';}
+    else{ans.classList.add('open');tog.textContent='▲ Hide';}
+  }
+</script>
+</body>
+</html>

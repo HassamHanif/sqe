@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQE Lecture 1 — Study Notes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono&display=swap');
+
+  :root {
+    --navy: #0d1b2e;
+    --navy2: #1a2e47;
+    --teal: #0e9f7c;
+    --teal-light: #d1f5ec;
+    --gold: #e8a020;
+    --gold-light: #fef3dc;
+    --red: #d83c2a;
+    --red-light: #fdecea;
+    --blue: #1a6fc4;
+    --blue-light: #deeeff;
+    --purple: #5c3ab7;
+    --purple-light: #ede8fb;
+    --green: #2e7d32;
+    --green-light: #e8f5e9;
+    --gray: #f4f5f6;
+    --border: #dde1e7;
+    --text: #1a1e26;
+    --muted: #5a6272;
+    --white: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: #f0f2f5;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .page-header {
+    background: var(--navy);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--teal), var(--gold));
+  }
+  .page-header .badge {
+    display: inline-block;
+    background: var(--teal);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .page-header h1 { font-family: 'Merriweather', serif; font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .page-header p { font-size: 14px; opacity: 0.7; }
+
+  .nav-tabs {
+    background: var(--navy2);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding: 0 1.5rem;
+  }
+  .nav-tab {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .nav-tab:hover { color: rgba(255,255,255,0.85); }
+  .nav-tab.active { color: white; border-bottom-color: var(--teal); }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-header .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .card-header h2 { font-size: 16px; font-weight: 700; }
+  .card-header .slide-tag {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--gray);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .card-body { padding: 1.5rem; }
+
+  /* Definition box */
+  .definition-box {
+    background: var(--navy);
+    color: white;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    border-left: 4px solid var(--gold);
+  }
+  .definition-box .label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .definition-box p { font-family: 'Merriweather', serif; font-style: italic; font-size: 15px; line-height: 1.8; }
+  .definition-box .source { font-size: 12px; opacity: 0.6; margin-top: 8px; font-style: normal; font-family: 'IBM Plex Sans', sans-serif; }
+
+  /* Two columns */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+  .info-block {
+    background: var(--gray);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+  .info-block h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .info-block ul { list-style: none; padding: 0; }
+  .info-block ul li { font-size: 14px; padding: 4px 0; display: flex; gap: 8px; }
+  .info-block ul li::before { content: '→'; color: var(--teal); font-weight: 700; flex-shrink: 0; }
+
+  /* Insight box */
+  .insight {
+    background: var(--teal-light);
+    border: 1px solid #a8e8d6;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    font-size: 14px;
+  }
+  .insight strong { color: var(--teal); }
+
+  .warning {
+    background: var(--gold-light);
+    border: 1px solid #f5d89a;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    font-size: 14px;
+  }
+  .warning strong { color: var(--gold); }
+
+  /* Perspective cards */
+  .perspective-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .perspective-grid { grid-template-columns: 1fr; } }
+  .perspective-card {
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    border-left: 4px solid;
+  }
+  .perspective-card.user { border-color: var(--blue); background: var(--blue-light); }
+  .perspective-card.dev { border-color: var(--teal); background: var(--teal-light); }
+  .perspective-card.mgr { border-color: var(--purple); background: var(--purple-light); }
+  .perspective-card.tester { border-color: var(--red); background: var(--red-light); }
+  .perspective-card h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .perspective-card.user h3 { color: var(--blue); }
+  .perspective-card.dev h3 { color: var(--teal); }
+  .perspective-card.mgr h3 { color: var(--purple); }
+  .perspective-card.tester h3 { color: var(--red); }
+  .perspective-card p { font-size: 13px; }
+
+  /* ISO grid */
+  .iso-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+  @media (max-width: 600px) { .iso-grid { grid-template-columns: repeat(2, 1fr); } }
+  .iso-item {
+    border-radius: 8px;
+    padding: 1rem 0.75rem;
+    text-align: center;
+  }
+  .iso-item .num { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .iso-item .name { font-size: 12px; font-weight: 600; }
+
+  .iso-1 { background: #dceefb; } .iso-1 .num { color: #1a6fc4; } .iso-1 .name { color: #1a6fc4; }
+  .iso-2 { background: #d1f5ec; } .iso-2 .num { color: #0e7a5d; } .iso-2 .name { color: #0e7a5d; }
+  .iso-3 { background: #ede8fb; } .iso-3 .num { color: #5c3ab7; } .iso-3 .name { color: #5c3ab7; }
+  .iso-4 { background: #fef3dc; } .iso-4 .num { color: #b07010; } .iso-4 .name { color: #b07010; }
+  .iso-5 { background: #fdecea; } .iso-5 .num { color: #c0321e; } .iso-5 .name { color: #c0321e; }
+  .iso-6 { background: #e8eaf6; } .iso-6 .num { color: #3949ab; } .iso-6 .name { color: #3949ab; }
+  .iso-7 { background: #e8f5e9; } .iso-7 .num { color: #2e7d32; } .iso-7 .name { color: #2e7d32; }
+  .iso-8 { background: #f3e5d6; } .iso-8 .num { color: #7c4a1a; } .iso-8 .name { color: #7c4a1a; }
+
+  /* Sub-char table */
+  table.sub-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.sub-table th { background: var(--navy); color: white; padding: 8px 12px; text-align: left; }
+  table.sub-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.sub-table tr:last-child td { border-bottom: none; }
+  table.sub-table tr:nth-child(even) td { background: var(--gray); }
+  table.sub-table .char-name { font-weight: 600; white-space: nowrap; }
+
+  /* QE activities */
+  .activities-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+  @media (max-width: 600px) { .activities-grid { grid-template-columns: 1fr 1fr; } }
+  .activity-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--gray);
+  }
+  .activity-card .act-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .activity-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* QE pillars */
+  .pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+  @media (max-width: 600px) { .pillars { grid-template-columns: 1fr 1fr; } }
+  .pillar { text-align: center; padding: 1rem 0.75rem; border-radius: 8px; }
+  .pillar .p-icon { font-size: 24px; margin-bottom: 8px; }
+  .pillar .p-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .pillar .p-desc { font-size: 11px; color: var(--muted); }
+  .pillar.prev { background: #dceefb; } .pillar.prev .p-title { color: var(--blue); }
+  .pillar.det { background: #d1f5ec; } .pillar.det .p-title { color: var(--teal); }
+  .pillar.cor { background: #ede8fb; } .pillar.cor .p-title { color: var(--purple); }
+  .pillar.proc { background: #fdecea; } .pillar.proc .p-title { color: var(--red); }
+
+  /* Comparison table */
+  table.comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.comp-table th { padding: 10px 14px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  table.comp-table th:first-child { background: var(--gray); color: var(--muted); }
+  table.comp-table th.q-col { background: var(--blue); color: white; }
+  table.comp-table th.r-col { background: var(--red); color: white; }
+  table.comp-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.comp-table td:first-child { font-weight: 600; background: var(--gray); font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--muted); }
+  table.comp-table tr:last-child td { border-bottom: none; }
+
+  /* Scenarios */
+  .scenario { border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; border-left: 5px solid; }
+  .scenario.ideal { background: var(--green-light); border-color: var(--green); }
+  .scenario.partial { background: var(--gold-light); border-color: var(--gold); }
+  .scenario.bad { background: var(--red-light); border-color: var(--red); }
+  .scenario .sc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .scenario.ideal .sc-label { color: var(--green); }
+  .scenario.partial .sc-label { color: var(--gold); }
+  .scenario.bad .sc-label { color: var(--red); }
+  .scenario .sc-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .scenario p { font-size: 13px; }
+
+  /* Class Activity */
+  .activity-box {
+    background: var(--navy);
+    color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .activity-box .act-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .activity-box .act-badge {
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .activity-box h3 { font-size: 16px; font-weight: 700; }
+  .activity-box .q { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+  .activity-box .q .q-text { font-size: 14px; margin-bottom: 10px; }
+  .activity-box .q .answer { background: rgba(14,159,124,0.2); border: 1px solid var(--teal); border-radius: 6px; padding: 0.75rem 1rem; font-size: 13px; margin-top: 8px; }
+  .activity-box .q .answer .ans-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--teal); margin-bottom: 4px; }
+
+  /* Sample Questions */
+  .q-section { margin-bottom: 2rem; }
+  .q-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 1rem; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .q-item { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem; overflow: hidden; }
+  .q-item .q-header { padding: 1rem 1.25rem; background: white; cursor: pointer; display: flex; align-items: flex-start; gap: 10px; user-select: none; }
+  .q-item .q-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  }
+  .q-item .q-text { font-size: 14px; font-weight: 500; flex: 1; }
+  .q-item .q-toggle { font-size: 12px; color: var(--muted); margin-left: auto; flex-shrink: 0; margin-top: 4px; }
+  .q-item .q-answer { display: none; padding: 1rem 1.25rem; background: var(--gray); border-top: 1px solid var(--border); font-size: 13px; line-height: 1.8; }
+  .q-item .q-answer .marks { display: inline-block; background: var(--teal); color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+  .q-item .q-answer .clo-tag { display: inline-block; background: var(--purple-light); color: var(--purple); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; margin-left: 6px; }
+  .q-item .q-answer.open { display: block; }
+  .q-item .q-type { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; margin-left: auto; }
+  .type-recall { background: #dceefb; color: var(--blue); }
+  .type-apply { background: var(--teal-light); color: #0a6e52; }
+  .type-scenario { background: var(--gold-light); color: #7a5000; }
+  .q-num.remember { background: var(--blue-light); color: var(--blue); }
+  .q-num.apply { background: var(--teal-light); color: var(--teal); }
+  .q-num.scenario { background: var(--gold-light); color: var(--gold); }
+
+  /* Key terms */
+  .terms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  @media (max-width: 600px) { .terms-grid { grid-template-columns: 1fr; } }
+  .term-item { background: var(--gray); border-radius: 8px; padding: 0.75rem 1rem; border-left: 3px solid var(--teal); }
+  .term-item .term { font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 3px; }
+  .term-item .def { font-size: 13px; color: var(--muted); }
+
+  /* Print styles */
+  @media print {
+    .nav-tabs, .page-header { page-break-inside: avoid; }
+    .tab-panel { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="badge">Software Quality Engineering</div>
+  <h1>Week 1 — Introduction to Software Quality</h1>
+  <p>Study Notes · Class Activities · Sample Exam Questions | CLO-1 (C-1: Remember) | Instructor: Engr. Asim Javaid</p>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('notes')">📒 Study Notes</div>
+  <div class="nav-tab" onclick="switchTab('activities')">✏️ Class Activities</div>
+  <div class="nav-tab" onclick="switchTab('questions')">🎯 Sample Exam Questions</div>
+  <div class="nav-tab" onclick="switchTab('terms')">📚 Key Terms</div>
+</div>
+
+<!-- ===== STUDY NOTES TAB ===== -->
+<div class="tab-panel active container" id="tab-notes">
+
+  <!-- Slide 3: What is Software Quality -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">📌</div>
+      <h2>What is Software Quality?</h2>
+      <span class="slide-tag">Slide 3 — Section 1</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">Official ISO/IEC 25010:2011 Definition</div>
+        <p>"The degree to which a software product satisfies stated and implied needs when used under specified conditions."</p>
+        <div class="source">— ISO/IEC 25010:2011</div>
+      </div>
+
+      <p style="font-size:14px;margin-bottom:1rem;">This definition has <strong>four key components</strong> — all are important for exam:</p>
+
+      <div class="two-col">
+        <div class="info-block">
+          <h3 style="color:var(--blue);">📋 Definition Breakdown</h3>
+          <ul>
+            <li><strong>Stated requirements</strong> — explicitly documented requirements (e.g., login must load in 2 sec)</li>
+            <li><strong>Implied expectations</strong> — unstated but expected (e.g., app shouldn't crash)</li>
+            <li><strong>Standards conformance</strong> — follows accepted coding/design standards</li>
+            <li><strong>Fitness for purpose</strong> — works correctly in the real-world context it was built for</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h3 style="color:var(--teal);">✅ Why Quality Matters</h3>
+          <ul>
+            <li><strong>Cost reduction</strong> — fixing a bug early is 10× cheaper than fixing it after release</li>
+            <li><strong>User trust</strong> — poor quality leads to negative reviews and user abandonment</li>
+            <li><strong>Maintainability</strong> — quality code is easier to extend and modify over time</li>
+            <li><strong>Safety-critical systems</strong> — low quality can cost lives (medical, aerospace, finance)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="insight">
+        <strong>💡 Exam Tip:</strong> The ISO definition says "degree" — meaning quality is measurable on a scale, not binary (good/bad). Also remember: stated = written down in requirements; implied = assumed but not written.
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 4: Quality in Context -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#ede8fb;">👥</div>
+      <h2>Quality in Context — 4 Stakeholder Perspectives</h2>
+      <span class="slide-tag">Slide 4 — Section 1</span>
+    </div>
+    <div class="card-body">
+      <p style="font-size:14px;margin-bottom:1rem;">Different stakeholders evaluate quality from different angles. All perspectives are equally valid:</p>
+      <div class="perspective-grid">
+        <div class="perspective-card user">
+          <h3>👤 User's View</h3>
+          <p>Does it do what I need? Is it easy and pleasant to use? Focuses on <strong>usability and functionality</strong>.</p>
+        </div>
+        <div class="perspective-card dev">
+          <h3>💻 Developer's View</h3>
+          <p>Does code meet specifications? Is it well-structured and testable? Focuses on <strong>code quality and design</strong>.</p>
+        </div>
+        <div class="perspective-card mgr">
+          <h3>📊 Manager's View</h3>
+          <p>Delivered on time, within budget? Minimizes rework? Focuses on <strong>process efficiency and cost</strong>.</p>
+        </div>
+        <div class="perspective-card tester">
+          <h3>🔍 Tester's View</h3>
+          <p>How many defects remain? Are requirements fully covered? Focuses on <strong>defect detection and coverage</strong>.</p>
+        </div>
+      </div>
+      <div class="warning">
+        <strong>⚠️ Exam Tip:</strong> In a scenario question, identify which stakeholder is speaking and what their quality concern is. E.g., "The app keeps crashing during payment" → User's View (reliability/usability).
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 5: Quality Attributes -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#d1f5ec;">⚙️</div>
+      <h2>Software Quality Attributes</h2>
+      <span class="slide-tag">Slide 5 — Section 2</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div class="info-block" style="background:#dceefb;">
+          <h3 style="color:var(--blue);">Functional Attributes</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:8px;"><em>WHAT the software does</em></p>
+          <ul>
+            <li><strong>Correctness</strong> — software does exactly what it is supposed to do according to specs</li>
+            <li><strong>Completeness</strong> — all required features are present and implemented</li>
+            <li><strong>Consistency</strong> — behaves predictably across different contexts and conditions</li>
+            <li><strong>Traceability</strong> — every requirement is linked to an implementation element</li>
+          </ul>
+        </div>
+        <div class="info-block" style="background:#d1f5ec;">
+          <h3 style="color:var(--teal);">Non-Functional Attributes</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:8px;"><em>HOW WELL the software performs</em></p>
+          <ul>
+            <li><strong>Performance</strong> — speed, throughput, response time</li>
+            <li><strong>Reliability</strong> — consistent correct operation over time without failure</li>
+            <li><strong>Usability</strong> — ease of learning and day-to-day use</li>
+            <li><strong>Maintainability</strong> — ease of modification, repair, and update</li>
+            <li><strong>Portability</strong> — ability to run across different environments/OS/hardware</li>
+            <li><strong>Security</strong> — protection against unauthorized access or data breach</li>
+          </ul>
+        </div>
+      </div>
+      <div class="insight" style="margin-top:1rem;">
+        <strong>💡 Memory Trick:</strong> Functional = <em>what it does</em> (like a job description). Non-functional = <em>how it does it</em> (like performance standards). Functional has 4 attributes; Non-functional has 6 key ones.
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 6 & 7: ISO 25010 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#fef3dc;">🏛️</div>
+      <h2>ISO/IEC 25010 — 8 Quality Characteristics</h2>
+      <span class="slide-tag">Slides 6 & 7 — Section 3</span>
+    </div>
+    <div class="card-body">
+      <p style="font-size:14px;margin-bottom:1rem;">ISO 25010 is the international standard that formally defines software product quality. It defines <strong>8 main characteristics</strong> — memorize all 8:</p>
+
+      <div class="iso-grid">
+        <div class="iso-item iso-1"><div class="num">1</div><div class="name">Functional Suitability</div></div>
+        <div class="iso-item iso-2"><div class="num">2</div><div class="name">Performance Efficiency</div></div>
+        <div class="iso-item iso-3"><div class="num">3</div><div class="name">Compatibility</div></div>
+        <div class="iso-item iso-4"><div class="num">4</div><div class="name">Usability</div></div>
+        <div class="iso-item iso-5"><div class="num">5</div><div class="name">Reliability</div></div>
+        <div class="iso-item iso-6"><div class="num">6</div><div class="name">Security</div></div>
+        <div class="iso-item iso-7"><div class="num">7</div><div class="name">Maintainability</div></div>
+        <div class="iso-item iso-8"><div class="num">8</div><div class="name">Portability</div></div>
+      </div>
+
+      <p style="font-size:14px;margin:1rem 0 0.75rem;font-weight:700;">Sub-characteristics (Deep Dive — Slide 7):</p>
+      <table class="sub-table">
+        <tr><th>Characteristic</th><th>Sub-characteristics</th></tr>
+        <tr><td class="char-name" style="color:var(--blue);">Functional Suitability</td><td>Functional completeness, correctness, appropriateness</td></tr>
+        <tr><td class="char-name" style="color:var(--teal);">Performance Efficiency</td><td>Time behaviour, resource utilisation, capacity</td></tr>
+        <tr><td class="char-name" style="color:var(--purple);">Compatibility</td><td>Co-existence, interoperability</td></tr>
+        <tr><td class="char-name" style="color:#b07010;">Usability</td><td>Recognisability, learnability, operability, UI aesthetics, accessibility, user error protection</td></tr>
+        <tr><td class="char-name" style="color:var(--red);">Reliability</td><td>Maturity, availability, fault tolerance, recoverability</td></tr>
+        <tr><td class="char-name" style="color:#3949ab;">Security</td><td>Confidentiality, integrity, non-repudiation, accountability, authenticity</td></tr>
+        <tr><td class="char-name" style="color:var(--green);">Maintainability</td><td>Modularity, reusability, analysability, modifiability, testability</td></tr>
+        <tr><td class="char-name" style="color:#7c4a1a;">Portability</td><td>Adaptability, installability, replaceability</td></tr>
+      </table>
+
+      <div class="warning" style="margin-top:1rem;">
+        <strong>⚠️ Exam Tip:</strong> ISO 25010 says exactly 8 characteristics. The standard is ISO/IEC 25010:2011. This is a very likely recall question. Use the mnemonic: <strong>F-P-C-U-R-S-M-P</strong> → "Fine Products Come Under Rigorous Standard Management Protocols"
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 8 & 9: Quality Engineering -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#e8f5e9;">🔧</div>
+      <h2>Introduction to Quality Engineering (QE)</h2>
+      <span class="slide-tag">Slides 8 & 9 — Section 4</span>
+    </div>
+    <div class="card-body">
+      <div class="definition-box">
+        <div class="label">Definition of Quality Engineering</div>
+        <p>The application of engineering principles and practices to ensure that software products meet defined quality standards throughout the development lifecycle.</p>
+      </div>
+
+      <p style="font-size:14px;margin-bottom:1rem;">QE operates on <strong>4 core activities</strong> (the four pillars):</p>
+
+      <div class="pillars">
+        <div class="pillar prev">
+          <div class="p-icon">🛡️</div>
+          <div class="p-title">Prevention</div>
+          <div class="p-desc">Build quality in from the start — requirements, design, code reviews</div>
+        </div>
+        <div class="pillar det">
+          <div class="p-icon">🔍</div>
+          <div class="p-title">Detection</div>
+          <div class="p-desc">Find defects early via inspections, testing, and static analysis</div>
+        </div>
+        <div class="pillar cor">
+          <div class="p-icon">🔧</div>
+          <div class="p-title">Correction</div>
+          <div class="p-desc">Fix defects and analyse root causes to prevent recurrence</div>
+        </div>
+        <div class="pillar proc">
+          <div class="p-icon">📊</div>
+          <div class="p-title">Process Control</div>
+          <div class="p-desc">Monitor and measure quality throughout the SDLC</div>
+        </div>
+      </div>
+
+      <p style="font-size:14px;margin:1rem 0 0.75rem;font-weight:700;">What Quality Engineers Do (6 key activities):</p>
+      <div class="activities-grid">
+        <div class="activity-card">
+          <div class="act-title">📋 Requirements Review</div>
+          <p>Analyse and validate requirements for completeness, consistency, and testability before development begins.</p>
+        </div>
+        <div class="activity-card">
+          <div class="act-title">🧪 Test Planning & Design</div>
+          <p>Define test strategies, write test plans, design test cases aligned with requirements and acceptance criteria.</p>
+        </div>
+        <div class="activity-card">
+          <div class="act-title">🔎 Inspections & Walkthroughs</div>
+          <p>Structured reviews of code, design documents, and specifications to detect defects early.</p>
+        </div>
+        <div class="activity-card">
+          <div class="act-title">📈 Metrics & Measurement</div>
+          <p>Collect and analyse quality metrics: defect density, coverage, reliability — to track and improve quality.</p>
+        </div>
+        <div class="activity-card">
+          <div class="act-title">🔄 Process Improvement</div>
+          <p>Identify root causes of quality issues and improve development and testing processes continuously.</p>
+        </div>
+        <div class="activity-card">
+          <div class="act-title">⚙️ Automation & Tooling</div>
+          <p>Build automated test suites and integrate quality gates into CI/CD pipelines for continuous assurance.</p>
+        </div>
+      </div>
+
+      <div class="insight">
+        <strong>💡 Key Point:</strong> QE is not the same as testing. Testing is one activity within QE. QE spans the entire SDLC — from requirements review to post-release process improvement.
+      </div>
+    </div>
+  </div>
+
+  <!-- Slides 10-13: Quality vs Reliability -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#fdecea;">⚖️</div>
+      <h2>Quality vs. Reliability</h2>
+      <span class="slide-tag">Slides 10–13 — Section 5</span>
+    </div>
+    <div class="card-body">
+      <table class="comp-table" style="margin-bottom:1.25rem;">
+        <tr>
+          <th></th>
+          <th class="q-col">Software Quality</th>
+          <th class="r-col">Software Reliability</th>
+        </tr>
+        <tr>
+          <td>Definition</td>
+          <td>Degree of conformance to requirements and fitness for purpose</td>
+          <td>Probability of failure-free operation for a specified time/usage</td>
+        </tr>
+        <tr>
+          <td>Scope</td>
+          <td>Broad — covers all 8 ISO 25010 characteristics</td>
+          <td>Narrow — only ONE specific quality attribute (characteristic #5)</td>
+        </tr>
+        <tr>
+          <td>Measurement</td>
+          <td>Qualitative + quantitative metrics (reviews, test coverage, security scans)</td>
+          <td>Purely quantitative: MTTF, MTBF, failure rate</td>
+        </tr>
+        <tr>
+          <td>Standard</td>
+          <td>ISO/IEC 25010</td>
+          <td>IEEE 982.1, MIL-HDBK-217</td>
+        </tr>
+        <tr>
+          <td>When assessed</td>
+          <td>Throughout SDLC and after delivery</td>
+          <td>During operation over time (measured in the field)</td>
+        </tr>
+        <tr>
+          <td>Examples</td>
+          <td>Usability tests, code reviews, security scans</td>
+          <td>MTTF calculations, reliability growth models</td>
+        </tr>
+      </table>
+
+      <div class="definition-box" style="margin-bottom:1rem;">
+        <div class="label">The Most Important Concept — Reliability ⊂ Quality</div>
+        <p>Reliability is a SUBSET of Quality. Quality contains reliability, not the other way around. High reliability does NOT automatically mean high overall quality.</p>
+      </div>
+
+      <p style="font-size:14px;font-weight:700;margin-bottom:0.75rem;">Real-World Banking App Case Study (Slide 13):</p>
+      <div class="scenario ideal">
+        <div class="sc-label">✅ Ideal — Scenario A</div>
+        <div class="sc-title">High Quality + High Reliability</div>
+        <p>App meets all user needs, works consistently 99.99% of the time, is secure, fast, and easy to use. This is the target for every software product.</p>
+      </div>
+      <div class="scenario partial">
+        <div class="sc-label">⚠️ Acceptable but Incomplete — Scenario B</div>
+        <div class="sc-title">High Reliability + Low Quality</div>
+        <p>App never crashes but the interface is confusing, transactions are slow, and features are missing. Reliable ≠ Quality. User will still be unhappy.</p>
+      </div>
+      <div class="scenario bad">
+        <div class="sc-label">❌ Unacceptable — Scenario C</div>
+        <div class="sc-title">Low Reliability + Low Quality</div>
+        <p>App crashes frequently, has security vulnerabilities, and fails to complete transactions reliably. Completely unacceptable — especially in a safety-critical banking context.</p>
+      </div>
+
+      <div class="insight" style="margin-top:1rem;">
+        <strong>💡 Key Formula to Remember:</strong> Reliability ⊂ Quality &nbsp;|&nbsp; Quality ⊃ Reliability &nbsp;|&nbsp; High Reliability ≠ High Quality
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CLASS ACTIVITIES TAB ===== -->
+<div class="tab-panel container" id="tab-activities">
+
+  <p style="font-size:14px;color:var(--muted);margin-bottom:1.5rem;">These activities are based on the lecture content. Practice answering them before reading the model answers.</p>
+
+  <div class="activity-box">
+    <div class="act-header">
+      <span class="act-badge">Activity 1</span>
+      <h3>Identifying Quality Perspectives</h3>
+    </div>
+    <div class="q">
+      <div class="q-text">Q1: A customer complains: "The app is too slow to load my account balance, and I can never find the transfer button." Which stakeholder perspective does this represent? Which quality attributes are being questioned?</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Perspective:</strong> User's View — the customer is describing their own experience of using the software.<br><br>
+        <strong>Quality Attributes Questioned:</strong><br>
+        — "Too slow to load" → <em>Performance Efficiency</em> (time behaviour sub-characteristic)<br>
+        — "Can never find the transfer button" → <em>Usability</em> (operability / recognisability sub-characteristic)</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q2: A project manager says: "We delivered this feature 3 weeks late and had to re-do the login module twice due to defects." Which perspective and quality concern does this reflect?</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Perspective:</strong> Manager's View<br><br>
+        <strong>Quality Concern:</strong> Late delivery = failure of process quality control. Re-doing the login module = defect correction cost, which increases project cost and reduces efficiency. This relates to poor <em>Prevention</em> and <em>Detection</em> in the QE process — defects should have been caught earlier.</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q3: A developer says: "The module I was given has no documentation, functions are 500 lines long, and there's no test coverage." What quality attributes are affected?</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Perspective:</strong> Developer's View<br><br>
+        <strong>Quality Attributes Affected:</strong><br>
+        — No documentation + 500-line functions → <em>Maintainability</em> (analysability, modifiability sub-characteristics)<br>
+        — No test coverage → <em>Maintainability</em> (testability sub-characteristic)<br>
+        — Also reflects poor <em>functional suitability</em> if the specs were not met properly.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header">
+      <span class="act-badge">Activity 2</span>
+      <h3>ISO 25010 — Classify the Scenario</h3>
+    </div>
+    <div class="q">
+      <div class="q-text">Q4: An e-commerce website works perfectly on Chrome but fails completely on Firefox. Which ISO 25010 characteristic does this violate?</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Characteristic:</strong> Compatibility (#3) — specifically the <em>interoperability</em> sub-characteristic.<br><br>
+        The software is unable to interact and operate correctly across different browser environments. This may also touch <em>Portability</em> (#8) — specifically <em>adaptability</em>.</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q5: A hospital system stores patient passwords in plain text and was hacked, exposing all patient records. Which ISO 25010 characteristic is violated? Name two specific sub-characteristics.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Characteristic:</strong> Security (#6)<br><br>
+        <strong>Sub-characteristics violated:</strong><br>
+        — <em>Confidentiality</em> — patient data was exposed to unauthorized parties<br>
+        — <em>Integrity</em> — data may have been altered/stolen, compromising its accuracy<br>
+        — Also arguably <em>Authenticity</em> — authentication/password storage was inadequate</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q6: After a server crash, the online banking system restores full operation within 30 seconds without any data loss. Which ISO 25010 sub-characteristics are demonstrated? Name at least two.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Characteristic:</strong> Reliability (#5)<br><br>
+        <strong>Sub-characteristics demonstrated:</strong><br>
+        — <em>Recoverability</em> — the system recovered successfully after a failure (30 seconds)<br>
+        — <em>Fault Tolerance</em> — the system continued without data loss despite the crash<br>
+        — <em>Availability</em> — the system quickly became available again after the crash</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header">
+      <span class="act-badge">Activity 3</span>
+      <h3>Quality vs. Reliability — Distinction</h3>
+    </div>
+    <div class="q">
+      <div class="q-text">Q7: "A military drone control software has never crashed in 10,000 flight hours, but pilots find the interface confusing and sometimes press the wrong buttons." Is this software high quality? Explain using the Quality vs. Reliability distinction.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p><strong>Reliability:</strong> HIGH — the software has operated failure-free for 10,000 flight hours (measured by MTTF). This means it scores highly on the Reliability characteristic of ISO 25010.<br><br>
+        <strong>Overall Quality:</strong> LOW — The confusing interface that causes pilots to press wrong buttons indicates a severe failure in <em>Usability</em> (operability sub-characteristic). In a safety-critical system, poor usability can lead to catastrophic human error.<br><br>
+        <strong>Conclusion:</strong> This confirms that <strong>Reliability ⊂ Quality</strong>. High reliability does NOT equal high overall quality. The software passes one of the 8 ISO characteristics but fails another critical one.</p>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q8: List three differences between Software Quality and Software Reliability using the comparison table from the lecture.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p>
+        1. <strong>Scope:</strong> Quality is broad (all 8 ISO 25010 characteristics); Reliability is narrow (only one specific characteristic).<br><br>
+        2. <strong>Measurement:</strong> Quality uses both qualitative and quantitative metrics (reviews, test coverage); Reliability uses purely quantitative models (MTTF, MTBF, failure rate).<br><br>
+        3. <strong>Standard:</strong> Quality is governed by ISO/IEC 25010; Reliability is governed by IEEE 982.1 and MIL-HDBK-217.<br><br>
+        Bonus: Quality is assessed throughout the SDLC; Reliability is measured during operational use over time.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="activity-box">
+    <div class="act-header">
+      <span class="act-badge">Activity 4</span>
+      <h3>Quality Engineering — Applying the 4 Pillars</h3>
+    </div>
+    <div class="q">
+      <div class="q-text">Q9: A development team is building a food delivery app. For each QE pillar (Prevention, Detection, Correction, Process Control), give one concrete example of what a Quality Engineer would do.</div>
+      <div class="answer">
+        <div class="ans-label">✅ Model Answer</div>
+        <p>
+        <strong>Prevention:</strong> Conduct requirements review sessions before development begins to ensure the delivery tracking feature requirements are complete, consistent, and testable.<br><br>
+        <strong>Detection:</strong> Perform code inspections and run automated unit tests during development to find defects in the order processing module early.<br><br>
+        <strong>Correction:</strong> When a defect is found (e.g., incorrect price calculation), fix it, document the root cause (a wrong formula), and add a regression test to prevent recurrence.<br><br>
+        <strong>Process Control:</strong> Measure defect density at each sprint, track test coverage percentage, and report to the team weekly so they can see if quality is improving or declining.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== SAMPLE EXAM QUESTIONS TAB ===== -->
+<div class="tab-panel container" id="tab-questions">
+
+  <p style="font-size:14px;color:var(--muted);margin-bottom:1.5rem;">Click any question to reveal the model answer. Questions are tagged by type: <span class="q-type type-recall">Recall</span> <span class="q-type type-apply">Apply</span> <span class="q-type type-scenario">Scenario</span> — CLO-1 focuses on Remember (C-1) level but scenario questions may appear.</p>
+
+  <div class="q-section">
+    <h2>📝 Section A — Short Answer / Recall Questions (CLO-1)</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">1</span>
+        <span class="q-text">Define software quality according to ISO/IEC 25010:2011.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">2 Marks</span><span class="clo-tag">CLO-1</span>
+        <p>According to ISO/IEC 25010:2011, software quality is defined as: <em>"The degree to which a software product satisfies stated and implied needs when used under specified conditions."</em><br><br>
+        Key terms: <strong>stated needs</strong> = explicitly documented requirements; <strong>implied needs</strong> = unstated but expected user expectations; <strong>specified conditions</strong> = the context in which the software operates.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">2</span>
+        <span class="q-text">List all 8 quality characteristics defined in ISO/IEC 25010.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">4 Marks</span><span class="clo-tag">CLO-1</span>
+        <p>The 8 ISO/IEC 25010 quality characteristics are:<br>
+        1. Functional Suitability<br>
+        2. Performance Efficiency<br>
+        3. Compatibility<br>
+        4. Usability<br>
+        5. Reliability<br>
+        6. Security<br>
+        7. Maintainability<br>
+        8. Portability</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">3</span>
+        <span class="q-text">What is the difference between functional and non-functional quality attributes? Give two examples of each.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">4 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Functional attributes</strong> relate to WHAT the software does — whether it performs its required functions correctly.<br>
+        Examples: Correctness (does what it is supposed to), Completeness (all required features present).<br><br>
+        <strong>Non-functional attributes</strong> relate to HOW WELL the software performs its functions.<br>
+        Examples: Performance (speed, throughput), Security (protection against unauthorized access).</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">4</span>
+        <span class="q-text">Define Quality Engineering (QE) and name its four core activities.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">4 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Definition:</strong> Quality Engineering (QE) is the application of engineering principles and practices to ensure that software products meet defined quality standards throughout the development lifecycle.<br><br>
+        <strong>Four core activities:</strong><br>
+        1. <em>Prevention</em> — Building quality in from the start through requirements review, design review, and code inspections<br>
+        2. <em>Detection</em> — Finding defects early through testing, inspections, and static analysis<br>
+        3. <em>Correction</em> — Fixing defects and analysing root causes to prevent recurrence<br>
+        4. <em>Process Control</em> — Monitoring and measuring quality metrics throughout the SDLC</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">5</span>
+        <span class="q-text">Name the four sub-characteristics of Reliability as defined in ISO/IEC 25010.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">2 Marks</span><span class="clo-tag">CLO-1</span>
+        <p>The four sub-characteristics of Reliability (ISO 25010) are:<br>
+        1. <strong>Maturity</strong> — how well the system meets reliability requirements under normal operation<br>
+        2. <strong>Availability</strong> — the system is accessible and operational when needed<br>
+        3. <strong>Fault Tolerance</strong> — the system continues to operate correctly despite hardware/software faults<br>
+        4. <strong>Recoverability</strong> — the system can recover data and re-establish performance after failure</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num remember">6</span>
+        <span class="q-text">State two reasons why software quality matters in safety-critical systems.</span>
+        <span class="q-type type-recall">Recall</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">2 Marks</span><span class="clo-tag">CLO-1</span>
+        <p>1. <strong>Human safety risk:</strong> In systems like medical devices, aviation, or nuclear control, a software defect can directly cause loss of life or serious injury.<br><br>
+        2. <strong>Cost of failure is catastrophic:</strong> Unlike commercial software where failure causes inconvenience, failure in safety-critical systems results in irreversible harm, massive financial liability, and loss of public trust. Early quality engineering prevents these failures.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-section">
+    <h2>🔬 Section B — Application Questions (CLO-1 + CLO-2)</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num apply">7</span>
+        <span class="q-text">Distinguish between software quality and software reliability. Why is it incorrect to say "if a system is reliable, it must be high quality"?</span>
+        <span class="q-type type-apply">Apply</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">5 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Software Quality</strong> is a broad, multi-dimensional concept that covers ALL 8 ISO 25010 characteristics — including usability, security, performance, maintainability, and reliability. It is assessed using both qualitative and quantitative methods throughout the SDLC.<br><br>
+        <strong>Software Reliability</strong> is one specific characteristic within software quality — the probability of failure-free operation for a specified time/usage period. It is measured quantitatively using metrics like MTTF (Mean Time to Failure) and MTBF.<br><br>
+        <strong>Why the statement is incorrect:</strong> Reliability is a SUBSET of quality (Reliability ⊂ Quality). A system can achieve high reliability (e.g., never crashes) while still scoring very poorly on other quality characteristics — for example, it may have a terrible user interface (low usability), be vulnerable to cyberattacks (low security), or be impossible to update without breaking (low maintainability). Therefore, high reliability alone does not guarantee high overall quality.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num apply">8</span>
+        <span class="q-text">Compare the four stakeholder perspectives on software quality. Which perspective focuses most on the internal structure of the software?</span>
+        <span class="q-type type-apply">Apply</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">4 Marks</span><span class="clo-tag">CLO-1</span>
+        <p>The four perspectives are:<br>
+        — <strong>User's View:</strong> Usability and functionality — does it do what I need, is it easy to use?<br>
+        — <strong>Developer's View:</strong> Code structure, specifications, and testability<br>
+        — <strong>Manager's View:</strong> On-time delivery, budget adherence, and minimal rework<br>
+        — <strong>Tester's View:</strong> Defect count, requirements coverage, and test completeness<br><br>
+        <strong>The Developer's View</strong> focuses most on the internal structure of the software, as developers are directly concerned with code quality, architectural design, and whether the implementation is well-structured and follows specifications.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-section">
+    <h2>🎭 Section C — Scenario-Based Questions</h2>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num scenario">9</span>
+        <span class="q-text">SCENARIO: A ride-sharing app has been running for 2 years with 99.95% uptime and zero crashes. However, users complain that: (a) the app takes 8 seconds to show nearby drivers, (b) the payment screen is confusing, causing accidental double-charges, and (c) the app cannot be updated without rewriting 60% of the codebase. Identify which ISO 25010 characteristics are violated for each complaint and explain.</span>
+        <span class="q-type type-scenario">Scenario</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">9 Marks — 3 per point</span><span class="clo-tag">CLO-1</span>
+        <p><strong>(a) "8 seconds to show nearby drivers"</strong><br>
+        ISO 25010 Characteristic violated: <strong>Performance Efficiency (#2)</strong><br>
+        Sub-characteristic: <em>Time behaviour</em> — the system fails to meet acceptable response time requirements. 8 seconds for a core function (showing drivers) is unacceptable and indicates inefficient algorithms or resource utilization.<br><br>
+
+        <strong>(b) "Confusing payment screen causing double-charges"</strong><br>
+        ISO 25010 Characteristic violated: <strong>Usability (#4)</strong><br>
+        Sub-characteristics: <em>Operability</em> (users cannot operate the payment function correctly) and <em>User error protection</em> (the system does not prevent user input errors from causing financial harm). Also potentially <strong>Functional Suitability (#1)</strong> if the double-charge is a functional defect.<br><br>
+
+        <strong>(c) "Cannot update without rewriting 60% of codebase"</strong><br>
+        ISO 25010 Characteristic violated: <strong>Maintainability (#7)</strong><br>
+        Sub-characteristics: <em>Modifiability</em> (changes cannot be made without major impact), <em>Modularity</em> (the system is not designed in independent modules), and potentially <em>Analysability</em> (hard to understand what needs to change).<br><br>
+
+        <strong>Note:</strong> The 99.95% uptime shows HIGH reliability, but these violations prove that <strong>Reliability ⊂ Quality</strong> — high reliability does not mean high overall quality.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num scenario">10</span>
+        <span class="q-text">SCENARIO: A software company has a new project to build an online exam system for a university. As a Quality Engineer, describe what you would do at each of the four QE pillars (Prevention, Detection, Correction, Process Control) during the project. Be specific to the exam system context.</span>
+        <span class="q-type type-scenario">Scenario</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">8 Marks — 2 per pillar</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Prevention:</strong> Before any coding begins, conduct a requirements review to ensure all exam system requirements are complete (e.g., does the system need to support 500 simultaneous users? Is auto-save specified?). Also review the system architecture design to identify any potential issues with scalability or security of student data before they become expensive code-level defects.<br><br>
+
+        <strong>Detection:</strong> Perform code walkthroughs and inspections during development to find defects in the timer module, question randomization logic, and submission handling. Execute test cases including: timing edge cases (what happens at exactly 0 seconds left?), browser compatibility tests, and load testing with 500+ simultaneous users.<br><br>
+
+        <strong>Correction:</strong> When defects are found (e.g., exam timer continues after submission, allowing cheating), fix them immediately, perform root cause analysis (e.g., the timer and submission events were not properly synchronized), and add a specific regression test to prevent the same defect recurring in future updates.<br><br>
+
+        <strong>Process Control:</strong> At the end of each sprint, measure defect density (defects per 1000 lines of code), test case pass rate, and requirement coverage percentage. Report these metrics to the project manager and team so that quality trends are visible and the team can adjust their practices if quality is declining.</p>
+      </div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-header" onclick="toggleAnswer(this)">
+        <span class="q-num scenario">11</span>
+        <span class="q-text">SCENARIO: Two students debate. Student A says "Quality and reliability mean the same thing — a reliable system is a quality system." Student B disagrees. Who is correct? Write a 6-line argument to settle the debate, using the ISO 25010 standard as evidence.</span>
+        <span class="q-type type-scenario">Scenario</span>
+        <span class="q-toggle">▼ Show Answer</span>
+      </div>
+      <div class="q-answer">
+        <span class="marks">5 Marks</span><span class="clo-tag">CLO-1</span>
+        <p><strong>Student B is correct.</strong><br><br>
+        According to ISO/IEC 25010, software quality is a broad concept encompassing 8 distinct characteristics: Functional Suitability, Performance Efficiency, Compatibility, Usability, Reliability, Security, Maintainability, and Portability.<br><br>
+        Reliability is just ONE of these 8 characteristics — it represents the probability of failure-free operation over time. A system that never crashes (high reliability) may still have a confusing interface (low usability), be vulnerable to hackers (low security), or be impossible to maintain (low maintainability).<br><br>
+        Therefore, reliability is a subset of quality (Reliability ⊂ Quality), meaning high reliability is necessary but NOT sufficient for high overall quality. Student A's claim is incorrect because it treats one component as equivalent to the entire concept.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KEY TERMS TAB ===== -->
+<div class="tab-panel container" id="tab-terms">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon" style="background:#dceefb;">📚</div>
+      <h2>Key Terms & Definitions</h2>
+    </div>
+    <div class="card-body">
+      <div class="terms-grid">
+        <div class="term-item">
+          <div class="term">Software Quality</div>
+          <div class="def">The degree to which a software product satisfies stated and implied needs when used under specified conditions. (ISO/IEC 25010:2011)</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Stated Requirements</div>
+          <div class="def">Explicitly documented requirements that the software must fulfill.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Implied Needs</div>
+          <div class="def">Unstated but expected user expectations that a reasonable user would assume the software fulfills.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Functional Attributes</div>
+          <div class="def">Quality attributes related to what the software does (correctness, completeness, consistency, traceability).</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Non-Functional Attributes</div>
+          <div class="def">Quality attributes related to how well the software performs (performance, reliability, usability, security, maintainability, portability).</div>
+        </div>
+        <div class="term-item">
+          <div class="term">ISO/IEC 25010</div>
+          <div class="def">International standard (2011) that defines 8 main quality characteristics for software product quality.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Quality Engineering (QE)</div>
+          <div class="def">Application of engineering principles to ensure software products meet quality standards throughout the entire development lifecycle.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Software Reliability</div>
+          <div class="def">The probability of failure-free operation of a system for a specified time/usage period under specified conditions. One of the 8 ISO 25010 characteristics.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">MTTF</div>
+          <div class="def">Mean Time To Failure — a reliability metric measuring the average time before a system failure occurs.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">MTBF</div>
+          <div class="def">Mean Time Between Failures — reliability metric measuring average time between consecutive failures (includes repair time).</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Defect Density</div>
+          <div class="def">A quality metric: number of defects per 1000 lines of code (or per function point). Used in Process Control.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Fitness for Purpose</div>
+          <div class="def">The degree to which a software product fulfills the specific goals and needs of its intended users in their real context of use.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Fault Tolerance</div>
+          <div class="def">A reliability sub-characteristic — the system continues to operate correctly despite the presence of hardware or software faults.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Recoverability</div>
+          <div class="def">A reliability sub-characteristic — the ability of a system to recover affected data and re-establish its desired state after a failure.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">Traceability</div>
+          <div class="def">A functional attribute — every requirement can be traced to its corresponding implementation element, and vice versa.</div>
+        </div>
+        <div class="term-item">
+          <div class="term">SDLC</div>
+          <div class="def">Software Development Life Cycle — the structured process for planning, creating, testing, and deploying software. QE spans the entire SDLC.</div>
+        </div>
+      </div>
+
+      <div class="insight" style="margin-top:1.5rem;">
+        <strong>💡 Mnemonic for 8 ISO Characteristics:</strong> <em>"Fine Products Come Under Rigorous Standard Management Protocols"</em><br>
+        F = Functional Suitability · P = Performance Efficiency · C = Compatibility · U = Usability · R = Reliability · S = Security · M = Maintainability · P = Portability
+      </div>
+
+      <div class="warning" style="margin-top:1rem;">
+        <strong>⚠️ Most Likely Exam Topics (CLO-1: Remember):</strong><br>
+        1. ISO definition of software quality (exact wording)<br>
+        2. All 8 ISO 25010 characteristics (in order)<br>
+        3. Sub-characteristics of Reliability and Maintainability<br>
+        4. Difference between Quality and Reliability (with the subset relationship)<br>
+        5. The 4 QE pillars (Prevention, Detection, Correction, Process Control)<br>
+        6. Functional vs. Non-functional attributes
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    const tabs = ['notes','activities','questions','terms'];
+    document.querySelectorAll('.nav-tab')[tabs.indexOf(tabId)].classList.add('active');
+  }
+
+  function toggleAnswer(header) {
+    const answer = header.nextElementSibling;
+    const toggle = header.querySelector('.q-toggle');
+    if (answer.classList.contains('open')) {
+      answer.classList.remove('open');
+      toggle.textContent = '▼ Show Answer';
+    } else {
+      answer.classList.add('open');
+      toggle.textContent = '▲ Hide Answer';
+    }
+  }
+</script>
+</body>
+</html>
